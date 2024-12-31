@@ -1,0 +1,11 @@
+## file ignore
+__pycache__
+.idea
+dist
+build
+*.egg-info
+*.DS*
+*dev*
+*tmp*
+## externsion ignore
+*.pyc

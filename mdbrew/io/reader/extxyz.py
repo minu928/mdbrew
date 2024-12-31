@@ -1,0 +1,57 @@
+import re
+import numpy as np
+from typing import TextIO
+from mdbrew.dataclass import MDState
+from mdbrew.io.reader.base import BaseReader
+
+
+class EXTXYZReader(BaseReader):
+    fmt = "extxyz"
+    PROPERTY_MAP = {
+        "species": "atom",
+        "positions": "coord",
+        "pos": "coord",
+        "position": "coord",
+        "forces": "force",
+        "force": "force",
+    }
+
+    def _make_mdstate(self, file: TextIO) -> MDState:
+        natoms = file.readline().strip()
+        if not natoms:
+            raise EOFError
+        natoms = int(natoms)
+        properties, header = parse_properties(file.readline())
+        columns = [(name, size) for name, size in properties.items()]
+        data = {name: [] for name, _ in columns}
+        col_idx = [sum(size for _, size in columns[:i]) for i in range(len(columns))]
+        for _ in range(natoms):
+            values = file.readline().split()
+            for (name, size), idx in zip(columns, col_idx):
+                if name == "species":
+                    data[name].append([values[idx]])
+                else:
+                    data[name].append([float(x) for x in values[idx : idx + size]])
+        data.update({self.PROPERTY_MAP[k]: data.pop(k) for k in self.PROPERTY_MAP if k in data})
+        return MDState(**data, **header)
+
+
+def parse_properties(line: str):
+    pattern = r'(\w+)=("(?:[^"\\]|\\.)*"|[^"\s]+)'
+    matches = re.findall(pattern, line)
+    property_size = {}
+    results = {}
+    for key, value in matches:
+        value = value.strip('"')
+        if key == "Lattice":
+            nums = [float(x) for x in value.split()]
+            results["box"] = np.array(nums).reshape(3, 3)
+        elif key in ["stress", "virial"]:
+            nums = [float(x) for x in value.split()]
+            results[key] = np.array(nums).reshape(3, 3)
+        elif key == "energy":
+            results[key] = float(value)
+        elif key == "Properties":
+            props = value.split(":")
+            property_size = {props[i]: int(props[i + 2]) for i in range(0, len(props), 3)}
+    return property_size, results
