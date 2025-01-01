@@ -10,7 +10,6 @@ from . import io
 from ._core import state, array
 from . import utils
 from . import errors
-from . import analysis
 
 
 __all__ = [
@@ -19,5 +18,4 @@ __all__ = [
     "array",
     "utils",
     "errors",
-    "analysis",
 ]

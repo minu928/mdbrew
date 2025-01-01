@@ -6,7 +6,7 @@ from itertools import islice
 from mdbrew._core.mdstate import MDState
 
 
-def str_to_idx(s: str) -> int | slice[int | None, int | None, int | None]:
+def str_to_idx(s: str) -> int | slice:
     return int(s) if ":" not in s else slice(*(int(p) if p else None for p in s.split(":")[:3]))
 
 
