@@ -1,8 +1,13 @@
 from pathlib import Path
-from typing import TextIO, Generator, List, Optional
+from typing import TextIO, Generator, List, Optional, Union
 from abc import abstractmethod, ABCMeta
+from itertools import islice
 
-from mdbrew.core import MDState, MDStateList
+from mdbrew.core import MDState
+
+
+def str_to_idx(s: str) -> Union[int, slice]:
+    return int(s) if ":" not in s else slice(*(int(p) if p else None for p in s.split(":")[:3]))
 
 
 class BaseReader(metaclass=ABCMeta):
@@ -55,7 +60,7 @@ class BaseReader(metaclass=ABCMeta):
                 raise RuntimeError(f"Unexpected error: {e}")
         return frame_offsets
 
-    def stream(self) -> Generator[MDState, None, None]:
+    def generate(self) -> Generator[MDState, None, None]:
         if self._file is None:
             raise RuntimeError("File is not open. Use 'with' statement.")
 
@@ -69,6 +74,32 @@ class BaseReader(metaclass=ABCMeta):
             except Exception as e:
                 raise RuntimeError(f"Unexpected error: {e}")
 
-    def read(self, frames=None) -> MDStateList:
+    def read(self, frames: str = ":") -> List[MDState]:
+        idx = str_to_idx(str(frames))
+
+        # Parse slice first to get stop
+        is_int = isinstance(idx, int)
+        start = idx if is_int else idx.start or 0  # temporary start before nframes adjustment
+        stop = (start + 1) if is_int else (idx.stop or None)  # None means all frames
+
+        # Get total frames
         with self:
-            return list(self.stream())
+            frame_offsets = self.get_frame_offsets(stop=stop)
+            nframes = len(frame_offsets)
+
+        # Now calculate actual start with nframes (for negative indexing)
+        start = (idx if idx >= 0 else nframes + idx) if is_int else idx.start or 0
+        stop = (start + 1) if is_int else (idx.stop or nframes)
+        step = 1 if is_int else (idx.step or 1)
+
+        # Validate ranges
+        if not 0 <= start < nframes or stop > nframes:
+            raise ValueError(f"frames [{start}, {stop}) exceed range [0, {nframes}).")
+
+        with self:
+            self._file.seek(frame_offsets[start])
+            return (
+                list(islice(self.generate(), 0, stop - start))
+                if step == 1
+                else [next(self.generate()) for _ in range(start, stop, step)]
+            )

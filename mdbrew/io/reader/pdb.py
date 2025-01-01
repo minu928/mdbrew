@@ -24,8 +24,7 @@ def parse_physicsline(line: str):
     for p in line.split(","):
         p = p.strip()
         if p.startswith("E"):
-            physical_data["energy"] = p.split("=")[-1]
-
+            physical_data["energy"] = float(p.split("=")[-1])
     return physical_data
 
 
@@ -41,7 +40,7 @@ def parse_boxline(line: str):
 class PDBReader(BaseReader):
     fmt = "pdb"
 
-    def _make_mdstate(file: TextIO):
+    def _make_mdstate(self, file: TextIO):
         line = file.readline().strip()
         if not line:
             raise EOFError
@@ -51,13 +50,7 @@ class PDBReader(BaseReader):
             line = file.readline()
         if line.startswith("REMARK"):
             physics = parse_physicsline(line=line)
-
         box = parse_boxline(line=file.readline())
-
-        lines = []
-        while not (line := file.readline()).startswith("END"):
-            lines.append(line)
-
         data = defaultdict(list)
         while not (line := file.readline()).startswith("END"):
             for prop, _slice in PROPERTY_SLICES.items():

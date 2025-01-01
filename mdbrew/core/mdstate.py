@@ -1,4 +1,3 @@
-from typing import List
 from dataclasses import dataclass, fields
 
 from mdbrew.core.mdarray import MDArray
@@ -40,6 +39,3 @@ class MDState:
             value = getattr(self, field.name)
             if value is not None:
                 setattr(self, field.name, field.type(value))
-
-
-MDStateList = List[MDState]
