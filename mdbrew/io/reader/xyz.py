@@ -1,5 +1,6 @@
 from typing import TextIO
-from mdbrew.dataclass import MDState
+
+from mdbrew.core import MDState
 from mdbrew.io.reader.base import BaseReader
 
 
@@ -18,4 +19,14 @@ class XYZReader(BaseReader):
             atom, x, y, z = file.readline().split()
             atom_list.append([atom])
             coord_list.append([float(x), float(y), float(z)])
-        return MDState(atom=atom_list, coord=coord_list)
+        return MDState(atom=atom_list, coord=coord_list, atomid=range(natoms))
+
+    def _get_frame_offset(self, file: TextIO) -> int:
+        frame_offset = file.tell()
+        line = file.readline()
+        if not line:
+            raise EOFError
+        natoms = int(line.strip())
+        file.readline()  # skip property line
+        [file.readline() for _ in range(natoms)]
+        return frame_offset

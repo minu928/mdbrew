@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Type, Dict
-from mdbrew.typing import FilePath
+
 from mdbrew.errors import NotSupportFileFormat
 from mdbrew.io.reader.base import BaseReader
 from mdbrew.io.reader.xyz import XYZReader
@@ -8,6 +8,8 @@ from mdbrew.io.reader.extxyz import EXTXYZReader
 from mdbrew.io.reader.poscar import POSCARReader
 from mdbrew.io.reader.lammpstrj import LAMMPSTRJReader
 from mdbrew.io.reader.gro import GROReader
+from mdbrew.io.reader.lmps import LMPSReader
+from mdbrew.io.reader.pdb import PDBReader
 
 
 Reader = BaseReader
@@ -19,12 +21,14 @@ registry: ReaderRegistry = {
     POSCARReader.fmt: POSCARReader,
     LAMMPSTRJReader.fmt: LAMMPSTRJReader,
     GROReader.fmt: GROReader,
+    LMPSReader.fmt: LMPSReader,
+    PDBReader.fmt: PDBReader,
 }
 
 SUPPORTED_FORMATS = tuple(registry.keys())
 
 
-def build(filepath: FilePath, *, fmt: str | None = None) -> Reader:
+def build(filepath: str, *, fmt: str | None = None) -> Reader:
     if not filepath:
         raise ValueError("Path cannot be empty")
     if fmt is None:

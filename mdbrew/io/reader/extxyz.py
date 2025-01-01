@@ -1,8 +1,31 @@
 import re
-import numpy as np
 from typing import TextIO
-from mdbrew.dataclass import MDState
+
+import numpy as np
+
+from mdbrew.core import MDState
 from mdbrew.io.reader.base import BaseReader
+
+
+def parse_properties(line: str):
+    pattern = r'(\w+)=("(?:[^"\\]|\\.)*"|[^"\s]+)'
+    matches = re.findall(pattern, line)
+    property_size = {}
+    results = {}
+    for key, value in matches:
+        value = value.strip('"')
+        if key == "Lattice":
+            nums = [float(x) for x in value.split()]
+            results["box"] = np.array(nums).reshape(3, 3)
+        elif key in ["stress", "virial"]:
+            nums = [float(x) for x in value.split()]
+            results[key] = np.array(nums).reshape(3, 3)
+        elif key == "energy":
+            results[key] = [float(value)]
+        elif key == "Properties":
+            props = value.split(":")
+            property_size = {props[i]: int(props[i + 2]) for i in range(0, len(props), 3)}
+    return property_size, results
 
 
 class EXTXYZReader(BaseReader):
@@ -35,23 +58,13 @@ class EXTXYZReader(BaseReader):
         data.update({self.PROPERTY_MAP[k]: data.pop(k) for k in self.PROPERTY_MAP if k in data})
         return MDState(**data, **header)
 
-
-def parse_properties(line: str):
-    pattern = r'(\w+)=("(?:[^"\\]|\\.)*"|[^"\s]+)'
-    matches = re.findall(pattern, line)
-    property_size = {}
-    results = {}
-    for key, value in matches:
-        value = value.strip('"')
-        if key == "Lattice":
-            nums = [float(x) for x in value.split()]
-            results["box"] = np.array(nums).reshape(3, 3)
-        elif key in ["stress", "virial"]:
-            nums = [float(x) for x in value.split()]
-            results[key] = np.array(nums).reshape(3, 3)
-        elif key == "energy":
-            results[key] = float(value)
-        elif key == "Properties":
-            props = value.split(":")
-            property_size = {props[i]: int(props[i + 2]) for i in range(0, len(props), 3)}
-    return property_size, results
+    def _get_frame_offset(self, file: TextIO) -> int:
+        frame_offset = file.tell()
+        line = file.readline()
+        if not line:
+            raise EOFError
+        natoms = int(line.strip())
+        file.readline()  # skip property line
+        for _ in range(natoms):
+            file.readline()
+        return frame_offset

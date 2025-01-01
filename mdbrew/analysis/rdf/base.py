@@ -1,8 +1,10 @@
-import numpy as np
 from typing import Tuple, Iterable
 from abc import abstractmethod, ABCMeta
+
+import numpy as np
+from numpy.typing import NDArray
+
 from mdbrew.utils.space import apply_pbc, calculate_distance
-from mdbrew.typing import NDArray
 
 
 class BaseRDF(metaclass=ABCMeta):

@@ -6,12 +6,17 @@ try:
 except:
     __version__ = "none"
 
-
-from . import dataclass
+from . import io
+from . import core
 from . import utils
-from . import typing
-from . import mdpy
 from . import errors
 from . import analysis
 
-__all__ = ["utils", "typing", "dataclass", "mdpy", "errors", "analysis", "io"]
+
+__all__ = [
+    "io",
+    "core",
+    "utils",
+    "errors",
+    "analysis",
+]

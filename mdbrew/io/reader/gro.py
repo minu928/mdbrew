@@ -1,17 +1,9 @@
-import numpy as np
 from typing import TextIO
-from mdbrew.dataclass import MDState
+
+import numpy as np
+
+from mdbrew.core import MDState
 from mdbrew.io.reader.base import BaseReader
-
-
-PROPERTY_SLICES = {
-    "residueid": slice(0, 5),
-    "residue": slice(5, 10),
-    "atom": slice(10, 15),
-    "atomid": slice(15, 20),
-    "coord": slice(20, 44),  # x,y,z (20-28, 28-36, 36-44)
-    "velocity": slice(44, 68),  # vx,vy,vz (44-52, 52-60, 60-68)
-}
 
 
 class GROReader(BaseReader):
@@ -26,17 +18,49 @@ class GROReader(BaseReader):
             raise EOFError
 
         natoms = int(file.readline().strip())
-        lines = [file.readline() for _ in range(natoms)]
 
+        line = file.readline()
         if self._has_velocity is None:
-            self._has_velocity = bool(lines[0][PROPERTY_SLICES["velocity"]].strip())
+            self._has_velocity = bool(line[slice(44, 68)].strip())
 
-        data = {}
-        for prop, _slice in PROPERTY_SLICES.items():
-            if prop == "velocity" and not self._has_velocity:
-                data[prop] = None
-                continue
-            data[prop] = np.array([line[_slice].split() for line in lines])
+        data = {
+            "residueid": np.empty(natoms, dtype=int),
+            "residue": np.empty(natoms, dtype=str),
+            "atom": np.empty(natoms, dtype=str),
+            "atomid": np.empty(natoms, dtype=int),
+            "coord": np.empty((natoms, 3), dtype=float),
+            "velocity": np.empty((natoms, 3), dtype=float) if self._has_velocity else None,
+        }
+
+        for i in range(natoms):
+            if i > 0:
+                line = file.readline()
+            data["residueid"][i] = int(line[0:5])
+            data["residue"][i] = line[5:10].strip()
+            data["atom"][i] = line[10:15].strip()
+            data["atomid"][i] = int(line[15:20])
+            data["coord"][i] = [float(line[20 + j * 8 : 20 + (j + 1) * 8].strip()) for j in range(3)]
+
+            if self._has_velocity:
+                data["velocity"][i] = [float(line[44 + j * 8 : 44 + (j + 1) * 8].strip()) for j in range(3)]
 
         box = np.diag([float(x) for x in file.readline().split()])
         return MDState(**data, box=box)
+
+    def _get_frame_offset(self, file: TextIO):
+        frame_offset = file.tell()
+        if not file.readline().strip():
+            raise EOFError
+        natoms = int(file.readline().strip())
+        [file.readline() for _ in range(natoms)]  # line: data
+        file.readline()  # line: box
+        return frame_offset
+
+    def _get_frame_offset(self, file: TextIO):
+        frame_offset = file.tell()
+        if not file.readline().strip():
+            raise EOFError
+        natoms = int(file.readline().strip())
+        [file.readline() for _ in range(natoms)]  # line: data
+        file.readline()  # line: box
+        return frame_offset

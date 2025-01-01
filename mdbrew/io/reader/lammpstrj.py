@@ -1,6 +1,8 @@
 from typing import TextIO
-from mdbrew.dataclass import MDState
+
+from mdbrew.core import MDState
 from mdbrew.io.reader.base import BaseReader
+from mdbrew.utils.space import convert_to_box_matrix
 
 
 calculate_box_length = lambda lb, ub: float(ub) - float(lb)
@@ -33,7 +35,7 @@ class LAMMPSTRJReader(BaseReader):
         natoms = int(file.readline().strip())
 
         ndims = file.readline().count("pp")
-        box = [calculate_box_length(*file.readline().split()) for _ in range(ndims)]
+        box = convert_to_box_matrix([calculate_box_length(*file.readline().split()) for _ in range(ndims)])
 
         if not self._is_column_inspected:
             columns = file.readline().split()[2:]
@@ -62,3 +64,16 @@ class LAMMPSTRJReader(BaseReader):
                 kwargs[key] = [value]
         self.property_dict.update(**kwargs)
         self._is_column_inspected = False
+
+    def _get_frame_offset(self, file: TextIO) -> int:
+        frame_offset = file.tell()
+        if not file.readline().strip():
+            raise EOFError
+        file.readline()
+        file.readline()
+        natoms = int(file.readline().strip())
+        ndims = file.readline().count("pp")
+        [file.readline().split() for _ in range(ndims)]  # line: box
+        file.readline()  # line: columns
+        [file.readline() for _ in range(natoms)]
+        return frame_offset

@@ -1,13 +1,14 @@
-import numpy as np
 from tqdm import tqdm
+
+import numpy as np
+
 from mdbrew.utils.space import convert_to_box_vec
 from mdbrew.errors import NotEqualFrameError
-from mdbrew.typing import Coord, Box
 from mdbrew.analysis.rdf.base import BaseRDF
 
 
 class NumpyRDF(BaseRDF):
-    def __init__(self, a: Coord, b: Coord, box: Box, *, nbins=100, ranges=(0, 6)):
+    def __init__(self, a, b, box, *, nbins=100, ranges=(0, 6)):
         super().__init__(a, b, box, nbins=nbins, ranges=ranges)
 
     def _check_args(self, a, b, box):

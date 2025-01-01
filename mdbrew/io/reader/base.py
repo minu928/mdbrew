@@ -1,13 +1,12 @@
 from pathlib import Path
-from typing import TextIO, Generator
+from typing import TextIO, Generator, List, Optional
 from abc import abstractmethod, ABCMeta
-from mdbrew.typing import FilePath, NDArray
-from mdbrew.dataclass import MDState, MDStateList
-from mdbrew.utils import str_to_slice
+
+from mdbrew.core import MDState, MDStateList
 
 
 class BaseReader(metaclass=ABCMeta):
-    def __init__(self, filepath: FilePath, **kwargs):
+    def __init__(self, filepath: str, **kwargs):
         self._filepath = Path(filepath)
         self._file = None
         self._kwargs = kwargs
@@ -36,6 +35,25 @@ class BaseReader(metaclass=ABCMeta):
     @abstractmethod
     def _make_mdstate(file: TextIO) -> MDState:
         pass
+
+    @abstractmethod
+    def _get_frame_offset(self, file: TextIO) -> int:
+        pass
+
+    def get_frame_offsets(self, stop: Optional[int] = None) -> List[int]:
+        if self._file is None:
+            raise RuntimeError("File is not open. Use 'with' statement.")
+        frame_offsets = []
+        while True:
+            try:
+                frame_offsets.append(self._get_frame_offset(file=self._file))
+                if stop and len(frame_offsets) >= stop:
+                    break
+            except EOFError:
+                break
+            except Exception as e:
+                raise RuntimeError(f"Unexpected error: {e}")
+        return frame_offsets
 
     def stream(self) -> Generator[MDState, None, None]:
         if self._file is None:
