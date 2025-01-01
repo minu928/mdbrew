@@ -1,8 +1,9 @@
-from ._factory import build, SUPPORTED_FORMATS
+from ._factory import read, get_reader, SUPPORTED_FORMATS
 from .base import BaseReader
 
 __all__ = [
-    "build",
+    "read",
+    "get_reader",
     "SUPPORTED_FORMATS",
     "BaseReader",
 ]
