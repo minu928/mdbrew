@@ -1,6 +1,7 @@
+from typing import Literal
 from dataclasses import dataclass, fields
 
-from mdbrew.core.mdarray import MDArray
+from mdbrew._core.mdarray import MDArray
 
 
 # fmt: off
@@ -39,3 +40,23 @@ class MDState:
             value = getattr(self, field.name)
             if value is not None:
                 setattr(self, field.name, field.type(value))
+
+
+MDStateAttr = Literal[
+    "atom",
+    "atomid",
+    "residue",
+    "residueid",
+    "coord",
+    "box",
+    "force",
+    "energy",
+    "velocity",
+    "charge",
+    "stress",
+    "virial",
+]
+
+
+def state(**kwargs: dict[MDStateAttr, MDArray]) -> MDState:
+    return MDState(**kwargs)

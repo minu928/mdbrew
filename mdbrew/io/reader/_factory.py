@@ -1,8 +1,7 @@
 from pathlib import Path
-from typing import Type, Dict, List
 
 from mdbrew.errors import NotSupportFileFormat
-from mdbrew.core import MDState
+from mdbrew._core import MDState
 from mdbrew.io.reader.base import BaseReader
 from mdbrew.io.reader.xyz import XYZReader
 from mdbrew.io.reader.extxyz import EXTXYZReader
@@ -14,7 +13,7 @@ from mdbrew.io.reader.pdb import PDBReader
 
 
 Reader = BaseReader
-ReaderRegistry = Dict[str, Type[BaseReader]]
+ReaderRegistry = dict[str, type[BaseReader]]
 
 registry: ReaderRegistry = {
     EXTXYZReader.fmt: EXTXYZReader,
@@ -41,7 +40,7 @@ def get_reader(filepath: str, *, fmt: str | None = None) -> Reader:
     return opener_cls(filepath=filepath)
 
 
-def read(filepath: str, frames: int | str = 0, *, fmt: str | None = None) -> List[MDState]:
+def read(filepath: str, frames: int | str = 0, *, fmt: str | None = None) -> list[MDState]:
     """Read molecular dynamics trajectory file and return list of MDState objects.
 
     Parameters

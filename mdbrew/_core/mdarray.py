@@ -10,3 +10,7 @@ class MDArray(ndarray):
         if isinstance(obj, ndarray) and obj.dtype == dtype:
             return obj.view(cls)
         return asarray(obj).astype(dtype=dtype).view(cls)
+
+
+def array(obj: ArrayLike, dtype=None) -> MDArray:
+    return MDArray(obj=obj, dtype=dtype)

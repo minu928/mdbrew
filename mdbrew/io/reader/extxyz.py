@@ -3,7 +3,7 @@ from typing import TextIO
 
 import numpy as np
 
-from mdbrew.core import MDState
+from mdbrew._core.mdstate import MDState
 from mdbrew.io.reader.base import BaseReader
 
 

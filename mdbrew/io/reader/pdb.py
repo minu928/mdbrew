@@ -4,7 +4,7 @@ from collections import defaultdict
 import numpy as np
 
 from mdbrew.io.reader.base import BaseReader
-from mdbrew.core import MDState
+from mdbrew._core.mdstate import MDState
 
 
 PROPERTY_SLICES = {

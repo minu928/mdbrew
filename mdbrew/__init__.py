@@ -7,7 +7,7 @@ except:
     __version__ = "none"
 
 from . import io
-from . import core
+from ._core import state, array
 from . import utils
 from . import errors
 from . import analysis
@@ -15,7 +15,8 @@ from . import analysis
 
 __all__ = [
     "io",
-    "core",
+    "state",
+    "array",
     "utils",
     "errors",
     "analysis",

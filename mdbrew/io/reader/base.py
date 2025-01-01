@@ -1,12 +1,12 @@
 from pathlib import Path
-from typing import TextIO, Generator, List, Optional, Union
+from typing import TextIO, Generator, List
 from abc import abstractmethod, ABCMeta
 from itertools import islice
 
-from mdbrew.core import MDState
+from mdbrew._core.mdstate import MDState
 
 
-def str_to_idx(s: str) -> Union[int, slice]:
+def str_to_idx(s: str) -> int | slice[int | None, int | None, int | None]:
     return int(s) if ":" not in s else slice(*(int(p) if p else None for p in s.split(":")[:3]))
 
 
@@ -45,7 +45,7 @@ class BaseReader(metaclass=ABCMeta):
     def _get_frame_offset(self, file: TextIO) -> int:
         pass
 
-    def get_frame_offsets(self, stop: Optional[int] = None) -> List[int]:
+    def get_frame_offsets(self, stop: int | None = None) -> List[int]:
         if self._file is None:
             raise RuntimeError("File is not open. Use 'with' statement.")
         frame_offsets = []
@@ -74,7 +74,7 @@ class BaseReader(metaclass=ABCMeta):
             except Exception as e:
                 raise RuntimeError(f"Unexpected error: {e}")
 
-    def read(self, frames: str = ":") -> List[MDState]:
+    def read(self, frames: int | str = ":") -> List[MDState]:
         idx = str_to_idx(str(frames))
 
         # Parse slice first to get stop

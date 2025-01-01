@@ -1,4 +1,3 @@
-from typing import Tuple, Iterable
 from abc import abstractmethod, ABCMeta
 
 import numpy as np
@@ -10,15 +9,7 @@ from mdbrew.utils.space import apply_pbc, calculate_distance
 class BaseRDF(metaclass=ABCMeta):
     TQDM_OPTIONS = dict(unit=" frame")
 
-    def __init__(
-        self,
-        a: Iterable,
-        b: Iterable,
-        box: Iterable,
-        *,
-        nbins: int = 100,
-        ranges: tuple[float, float] = (0, 6),
-    ):
+    def __init__(self, a, b, box, *, nbins: int = 100, ranges: tuple[float, float] = (0, 6)):
         self.a, self.b, self.box = self._check_args(a=a, b=b, box=box)
         self.nbins = nbins
         self.range = ranges
@@ -66,7 +57,7 @@ class BaseRDF(metaclass=ABCMeta):
         self._finalize_rdf(rdf, histogram, nframes)
         return self
 
-    def _process_single_frame(self, a_frame: NDArray, b_frame: NDArray, box_frame: NDArray) -> Tuple[NDArray, float]:
+    def _process_single_frame(self, a_frame: NDArray, b_frame: NDArray, box_frame: NDArray) -> tuple[NDArray, float]:
         distance = calculate_distance(apply_pbc(a_frame[:, None, :] - b_frame[None, :, :], box=box_frame))
         histogram = np.histogram(distance, bins=self.nbins, range=self.range)[0]
         volume = np.prod(box_frame)
