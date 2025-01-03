@@ -31,7 +31,7 @@ class POSCARReader(BaseReader):
         natoms = sum(int(count) for count in element_counts)
         coords = [file.readline().split() for _ in range(natoms)]
 
-        return MDState(atom=atoms, coord=coords, box=box, atomid=range(natoms))
+        return MDState(atom=atoms, coord=coords, box=box, atomid=range(1, natoms + 1))
 
     def _get_frame_offset(self, file):
         frame_offset = file.tell()

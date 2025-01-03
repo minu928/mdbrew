@@ -56,7 +56,7 @@ class EXTXYZReader(BaseReader):
                 else:
                     data[name].append([float(x) for x in values[idx : idx + size]])
         data.update({self.PROPERTY_MAP[k]: data.pop(k) for k in self.PROPERTY_MAP if k in data})
-        return MDState(**data, **header)
+        return MDState(**data, **header, atomid=range(1, natoms + 1))
 
     def _get_frame_offset(self, file: TextIO) -> int:
         frame_offset = file.tell()

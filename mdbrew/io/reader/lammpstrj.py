@@ -12,6 +12,13 @@ def find_column_indices(columns, targets):
     return [columns.index(col) for col in targets if col in columns]
 
 
+def check_atomindices(atomindices: list[int]):
+    natomindices = len(atomindices)
+    if natomindices == 1:
+        return atomindices  # "type"
+    return [atomindices[-1]]  # "element"
+
+
 class LAMMPSTRJReader(BaseReader):
     fmt = "lammpstrj"
 
@@ -19,6 +26,7 @@ class LAMMPSTRJReader(BaseReader):
         super().__init__(filepath, **kwargs)
         self._is_column_inspected = False
         self.property_dict = {
+            "atomid": ["id"],
             "atom": ["type", "element"],
             "coord": ["x", "y", "z"],
             "force": ["fx", "fy", "fz"],
@@ -44,6 +52,7 @@ class LAMMPSTRJReader(BaseReader):
                 for name, cols in self.property_dict.items()
                 if (indices := find_column_indices(columns, cols))
             }
+            data_indices["atom"] = check_atomindices(data_indices["atom"])
             self._data_indices = data_indices
             self._is_column_inspected = True
         else:

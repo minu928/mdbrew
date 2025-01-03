@@ -19,7 +19,7 @@ class XYZReader(BaseReader):
             atom, x, y, z = file.readline().split()
             atom_list.append([atom])
             coord_list.append([float(x), float(y), float(z)])
-        return MDState(atom=atom_list, coord=coord_list, atomid=range(natoms))
+        return MDState(atom=atom_list, coord=coord_list, atomid=range(1, natoms + 1))
 
     def _get_frame_offset(self, file: TextIO) -> int:
         frame_offset = file.tell()

@@ -32,7 +32,7 @@ def get_reader(filepath: str, *, fmt: str | None = None) -> Reader:
     if not filepath:
         raise ValueError("Path cannot be empty")
     if fmt is None:
-        fmt = Path(filepath).suffix.lstrip(".")
+        fmt = Path(filepath).suffix.lstrip(".").lower()
     try:
         opener_cls = registry[fmt]
     except KeyError:
