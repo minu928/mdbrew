@@ -11,13 +11,11 @@ def update_defaults(kwargs: dict[str, any]):
 
 
 class POSCARWriter(BaseWriter):
+    fmt = "poscar"
+
     def __init__(self, filepath, **kwargs):
         super().__init__(filepath, **kwargs)
         self.__defaults = update_defaults(kwargs=kwargs)
-
-    @property
-    def fmt(self):
-        return "poscar"
 
     @property
     def _required_attributes(self):
