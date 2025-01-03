@@ -25,8 +25,8 @@ class GROReader(BaseReader):
 
         data = {
             "residueid": np.empty(natoms, dtype=int),
-            "residue": np.empty(natoms, dtype=str),
-            "atom": np.empty(natoms, dtype=str),
+            "residue": np.empty(natoms, dtype="<U5"),
+            "atom": np.empty(natoms, dtype="<U5"),
             "atomid": np.empty(natoms, dtype=int),
             "coord": np.empty((natoms, 3), dtype=float),
             "velocity": np.empty((natoms, 3), dtype=float) if self._has_velocity else None,

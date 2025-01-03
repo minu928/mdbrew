@@ -38,7 +38,7 @@ class BaseWriter(metaclass=ABCMeta):
     @property
     @abstractmethod
     def _required_attributes(self) -> tuple[str]:
-        raise NotImplementedError(f"")
+        pass
 
     @abstractmethod
     def _write_mdstate(self, file: TextIO, mdstate: MDState) -> None:

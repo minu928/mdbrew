@@ -7,6 +7,8 @@ from mdbrew.io.writer.base import BaseWriter
 from mdbrew.io.writer.xyz import XYZWriter
 from mdbrew.io.writer.lmps import LMPSWriter
 from mdbrew.io.writer.poscar import POSCARWriter
+from mdbrew.io.writer.extxyz import EXTXYZWriter
+
 
 Writer = BaseWriter
 WriterRegistry = dict[str, type[BaseWriter]]
@@ -15,6 +17,7 @@ registry: WriterRegistry = {
     XYZWriter.fmt: XYZWriter,
     LMPSWriter.fmt: LMPSWriter,
     POSCARWriter.fmt: POSCARWriter,
+    EXTXYZWriter.fmt: EXTXYZWriter,
 }
 
 WRITER_FORMATS = tuple(registry.keys())
