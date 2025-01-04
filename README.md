@@ -1,22 +1,24 @@
 # MDbrew
 
-<img src="https://img.shields.io/badge/Python-383b40?style=round-square&logo=Python&logoColor=#f5f5f5"/> <img src="https://img.shields.io/badge/Jupyter-383b40?style=round-square&logo=Jupyter&logoColor=#f5f5f5"/>
+<img src="https://img.shields.io/badge/Python-383b40?style=round-square&logo=Python&logoColor=#f5f5f5"/>
 
+MDBrew is a Python library designed for efficient post-processing and analysis of trajectory and physical property data generated from molecular dynamics simulations.
 
-- VERSION : (3.0.0)
-
-## How to install
-
+## Installation
 ```bash
 pip install mdbrew
 ```
+```bash
+git clone https://github.com/minu928/mdbrew.git
+cd mdbrew
+pip install .
+```
 
 ## Example
-### read
 ```python
 from mdbrew.io import read
 
-
-filepath = "somewhere/.extxyz"
-mdstate = read(filepath, frames=0, fmt="extxyz")
+trjfile = "somewhere.gro"
+mdstates = read(trjfile, frames=0)
+print(f"{mdstates=}")
 ```
