@@ -18,8 +18,23 @@ class Charge(MDArray): ...
 class Stress(MDArray): ...
 class Virial(MDArray): ...
 
-
 # fmt: on
+MDStateAttr = Literal[
+    "atom",
+    "atomid",
+    "residue",
+    "residueid",
+    "coord",
+    "box",
+    "force",
+    "energy",
+    "velocity",
+    "charge",
+    "stress",
+    "virial",
+]
+
+
 @dataclass(slots=True)
 class MDState:
     atom: Atom = None
@@ -41,22 +56,19 @@ class MDState:
             if value is not None:
                 setattr(self, field.name, field.type(value))
 
+    @classmethod
+    def get_type(cls, name: MDStateAttr) -> type[MDArray]:
+        try:
+            field = next(f for f in fields(cls) if f.name == name)
+            return field.type
+        except StopIteration:
+            raise ValueError(f"{name} is not a valid MDState attribute")
 
-MDStateAttr = Literal[
-    "atom",
-    "atomid",
-    "residue",
-    "residueid",
-    "coord",
-    "box",
-    "force",
-    "energy",
-    "velocity",
-    "charge",
-    "stress",
-    "virial",
-]
+    def get(self, name: MDStateAttr) -> MDArray | None:
+        value = getattr(self, name, None)
+        return value
 
-
-def state(**kwargs: dict[MDStateAttr, MDArray]) -> MDState:
-    return MDState(**kwargs)
+    def set(self, name: MDStateAttr, value: MDArray | None) -> None:
+        if value is not None:
+            value = self.get_type(name)(value)
+        setattr(self, name, value)
