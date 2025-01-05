@@ -1,15 +1,15 @@
 from pathlib import Path
 
 from mdbrew.errors import NotSupportFileFormat
-from mdbrew._core import MDState
-from mdbrew.io.reader.base import BaseReader
-from mdbrew.io.reader.xyz import XYZReader
-from mdbrew.io.reader.extxyz import EXTXYZReader
-from mdbrew.io.reader.poscar import POSCARReader
-from mdbrew.io.reader.lammpstrj import LAMMPSTRJReader
-from mdbrew.io.reader.gro import GROReader
-from mdbrew.io.reader.lmps import LMPSReader
-from mdbrew.io.reader.pdb import PDBReader
+from mdbrew.core import MDState
+from .base import BaseReader
+from .xyz import XYZReader
+from .extxyz import EXTXYZReader
+from .poscar import POSCARReader
+from .lammpstrj import LAMMPSTRJReader
+from .gro import GROReader
+from .lmps import LMPSReader
+from .pdb import PDBReader
 
 
 Reader = BaseReader

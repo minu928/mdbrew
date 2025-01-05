@@ -1,8 +1,9 @@
 from typing import TextIO
 
-from mdbrew._core.mdstate import MDState
-from mdbrew.io.reader.base import BaseReader
+from mdbrew.core import MDState
 from mdbrew.utils.space import convert_to_box_matrix
+
+from .base import BaseReader
 
 
 calculate_box_length = lambda lb, ub: float(ub) - float(lb)

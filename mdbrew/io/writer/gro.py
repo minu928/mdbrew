@@ -1,7 +1,10 @@
+from typing import TextIO
+
 from numpy import column_stack, diag
 
-from mdbrew.io.writer.base import BaseWriter
-from mdbrew._core.mdstate import MDState
+from mdbrew.core import MDState
+
+from .base import BaseWriter
 
 
 EXCLUDE_BOX_IDX = -1
@@ -18,7 +21,7 @@ class GROWriter(BaseWriter):
     def _required_attributes(self) -> tuple[str, ...]:
         return ("residueid", "residue", "atom", "atomid", "coord", "box")
 
-    def _write_mdstate(self, file, mdstate: MDState) -> None:
+    def _write_mdstate(self, file: TextIO, mdstate: MDState) -> None:
         file.write(f"GRO written by MDBrew\n{len(mdstate.atom)}\n")
         for v in column_stack([getattr(mdstate, attr) for attr in self._required_attributes[:EXCLUDE_BOX_IDX]]):
             file.write(value2line(v=v))

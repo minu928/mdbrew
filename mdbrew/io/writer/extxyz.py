@@ -1,7 +1,10 @@
+from typing import TextIO
+
 from numpy import column_stack, savetxt
 
-from mdbrew.io.writer.base import BaseWriter
-from mdbrew._core.mdstate import MDState
+from mdbrew.core import MDState
+
+from .base import BaseWriter
 
 
 SUPPORTED_ATTRIBUTES = {"box": "Lattice", "stress": "stress", "virial": "virial", "energy": "energy"}
@@ -15,7 +18,7 @@ class EXTXYZWriter(BaseWriter):
     def _required_attributes(self) -> tuple[str, ...]:
         return ("atom", "coord")
 
-    def _write_mdstate(self, file, mdstate: MDState) -> None:
+    def _write_mdstate(self, file: TextIO, mdstate: MDState) -> None:
         attr_line = self.__make_attr_line(mdstate=mdstate)
         prop_line, prop_data = self.__make_prop_info(mdstate=mdstate)
         header = f'{attr_line} {prop_line} pbc="T T T"'

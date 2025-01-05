@@ -1,9 +1,10 @@
 from typing import TextIO
 
-import numpy as np
+from numpy import empty, diag
 
-from mdbrew._core.mdstate import MDState
-from mdbrew.io.reader.base import BaseReader
+from mdbrew.core import MDState
+
+from .base import BaseReader
 
 
 class GROReader(BaseReader):
@@ -24,12 +25,12 @@ class GROReader(BaseReader):
             self._has_velocity = bool(line[slice(44, 68)].strip())
 
         data = {
-            "residueid": np.empty(natoms, dtype=int),
-            "residue": np.empty(natoms, dtype="<U5"),
-            "atom": np.empty(natoms, dtype="<U5"),
-            "atomid": np.empty(natoms, dtype=int),
-            "coord": np.empty((natoms, 3), dtype=float),
-            "velocity": np.empty((natoms, 3), dtype=float) if self._has_velocity else None,
+            "residueid": empty(natoms, dtype=int),
+            "residue": empty(natoms, dtype="<U5"),
+            "atom": empty(natoms, dtype="<U5"),
+            "atomid": empty(natoms, dtype=int),
+            "coord": empty((natoms, 3), dtype=float),
+            "velocity": empty((natoms, 3), dtype=float) if self._has_velocity else None,
         }
 
         for i in range(natoms):
@@ -44,7 +45,7 @@ class GROReader(BaseReader):
             if self._has_velocity:
                 data["velocity"][i] = [float(line[44 + j * 8 : 44 + (j + 1) * 8].strip()) for j in range(3)]
 
-        box = np.diag([float(x) for x in file.readline().split()])
+        box = diag([float(x) for x in file.readline().split()])
         return MDState(**data, box=box)
 
     def _get_frame_offset(self, file: TextIO):

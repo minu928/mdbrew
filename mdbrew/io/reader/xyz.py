@@ -1,7 +1,8 @@
 from typing import TextIO
 
-from mdbrew._core import MDState
-from mdbrew.io.reader.base import BaseReader
+from mdbrew.core import MDState
+
+from .base import BaseReader
 
 
 class XYZReader(BaseReader):

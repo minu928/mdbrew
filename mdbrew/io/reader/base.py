@@ -3,7 +3,7 @@ from typing import TextIO, Generator, List
 from abc import abstractmethod, ABCMeta
 from itertools import islice
 
-from mdbrew._core.mdstate import MDState
+from mdbrew.core import MDState
 
 
 def str_to_idx(s: str) -> int | slice:

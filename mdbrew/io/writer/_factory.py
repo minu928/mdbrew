@@ -2,12 +2,13 @@ from pathlib import Path
 from typing import Iterator
 
 from mdbrew.errors import NotSupportFileFormat
-from mdbrew._core import MDState
-from mdbrew.io.writer.base import BaseWriter
-from mdbrew.io.writer.xyz import XYZWriter
-from mdbrew.io.writer.lmps import LMPSWriter
-from mdbrew.io.writer.poscar import POSCARWriter
-from mdbrew.io.writer.extxyz import EXTXYZWriter
+from mdbrew.core import MDState
+
+from .base import BaseWriter
+from .xyz import XYZWriter
+from .lmps import LMPSWriter
+from .poscar import POSCARWriter
+from .extxyz import EXTXYZWriter
 
 
 Writer = BaseWriter

@@ -1,6 +1,10 @@
+from typing import TextIO
+
 from numpy import unique, where, savetxt
 
-from mdbrew.io.writer.base import BaseWriter
+from mdbrew.core import MDState
+
+from .base import BaseWriter
 
 
 def update_defaults(kwargs: dict[str, any]):
@@ -21,7 +25,7 @@ class POSCARWriter(BaseWriter):
     def _required_attributes(self):
         return ("atom", "box", "coord")
 
-    def _write_mdstate(self, file, mdstate):
+    def _write_mdstate(self, file: TextIO, mdstate: MDState):
         # line: head
         scale = self.__defaults["scale"]
         file.write(f"POSCAR written by MDBrew\n{scale}\n")

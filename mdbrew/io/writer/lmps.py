@@ -2,8 +2,9 @@ from typing import Iterable, TextIO
 
 from numpy import array, diag, column_stack, savetxt
 
-from mdbrew._core.mdstate import MDState
-from mdbrew.io.writer.base import BaseWriter
+from mdbrew.core import MDState
+
+from .base import BaseWriter
 
 
 class LMPSWriter(BaseWriter):

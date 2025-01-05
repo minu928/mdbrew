@@ -10,14 +10,12 @@ from . import io
 from . import utils
 from . import errors
 from . import unit
-
-from ._core import state, array
+from . import core
 
 __all__ = [
     "io",
     "errors",
     "utils",
     "unit",
-    "state",
-    "array",
+    "core",
 ]

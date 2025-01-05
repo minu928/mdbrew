@@ -1,10 +1,11 @@
 from typing import TextIO
 from collections import defaultdict
 
-import numpy as np
+from numpy import array, diag, column_stack
 
-from mdbrew.io.reader.base import BaseReader
-from mdbrew._core.mdstate import MDState
+from mdbrew.core import MDState
+
+from .base import BaseReader
 
 
 PROPERTY_SLICES = {
@@ -31,7 +32,7 @@ def parse_physicsline(line: str):
 def parse_boxline(line: str):
     if line.startswith("CRYST1"):
         try:
-            return np.diag(np.array(line.split()[1:4], dtype=float))
+            return diag(array(line.split()[1:4], dtype=float))
         except (ValueError, IndexError) as e:
             raise ValueError(f"Invalid box line format: {e}")
     raise NotImplementedError("Only CRYST1 format is supported")
@@ -56,7 +57,7 @@ class PDBReader(BaseReader):
             for prop, _slice in PROPERTY_SLICES.items():
                 if prop_data := line[_slice].strip():
                     data[prop].append(prop_data)
-        data["coord"] = np.column_stack([data.pop("x"), data.pop("y"), data.pop("z")]).astype(float)
+        data["coord"] = column_stack([data.pop("x"), data.pop("y"), data.pop("z")]).astype(float)
         return MDState(**data, box=box, **physics)
 
     def _get_frame_offset(self, file):

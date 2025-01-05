@@ -1,25 +1,26 @@
-import re
+from re import findall
 from typing import TextIO
 
-import numpy as np
+from numpy import array
 
-from mdbrew._core.mdstate import MDState
-from mdbrew.io.reader.base import BaseReader
+from mdbrew.core import MDState
+
+from .base import BaseReader
 
 
 def parse_properties(line: str):
     pattern = r'(\w+)=("(?:[^"\\]|\\.)*"|[^"\s]+)'
-    matches = re.findall(pattern, line)
+    matches = findall(pattern, line)
     property_size = {}
     results = {}
     for key, value in matches:
         value = value.strip('"')
         if key == "Lattice":
             nums = [float(x) for x in value.split()]
-            results["box"] = np.array(nums).reshape(3, 3)
+            results["box"] = array(nums).reshape(3, 3)
         elif key in ["stress", "virial"]:
             nums = [float(x) for x in value.split()]
-            results[key] = np.array(nums).reshape(3, 3)
+            results[key] = array(nums).reshape(3, 3)
         elif key == "energy":
             results[key] = [float(value)]
         elif key == "Properties":
