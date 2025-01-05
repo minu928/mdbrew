@@ -46,7 +46,20 @@ class BaseReader(metaclass=ABCMeta):
     def _get_frame_offset(self, file: TextIO) -> int:
         pass
 
-    def get_frame_offsets(self, stop: int | None = None) -> List[int]:
+    def generate_states(self) -> Generator[MDState, None, None]:
+        if self._file is None:
+            raise RuntimeError("File is not open. Use 'with' statement.")
+        while True:
+            try:
+                yield self._make_mdstate(file=self._file)
+            except ValueError as e:
+                raise ValueError(f"Error reading atom data: {e}") from e
+            except EOFError:
+                break
+            except Exception as e:
+                raise RuntimeError(f"Unexpected error: {e}") from e
+
+    def _collect_frame_offsets(self, stop: int | None = None) -> List[int]:
         if self._file is None:
             raise RuntimeError("File is not open. Use 'with' statement.")
         frame_offsets = []
@@ -61,23 +74,7 @@ class BaseReader(metaclass=ABCMeta):
                 raise RuntimeError(f"Unexpected error: {e}") from e
         return frame_offsets
 
-    def generate(self) -> Generator[MDState, None, None]:
-        if self._file is None:
-            raise RuntimeError("File is not open. Use 'with' statement.")
-        while True:
-            try:
-                yield self._make_mdstate(file=self._file)
-            except ValueError as e:
-                raise ValueError(f"Error reading atom data: {e}") from e
-            except EOFError:
-                break
-            except Exception as e:
-                raise RuntimeError(f"Unexpected error: {e}") from e
-
-    def iread(self, frames: int | str = ":") -> Generator[MDState, None, None]:
-        if self._file is None:
-            raise RuntimeError("File is not open. Use 'with' statement.")
-
+    def get_frame_offsets(self, frames: int | str = "0"):
         idx = str_to_idx(str(frames))
 
         # Parse slice first to get stop
@@ -86,7 +83,7 @@ class BaseReader(metaclass=ABCMeta):
         stop = (start + 1) if is_int else (idx.stop or None)
 
         # Get total frames
-        _frame_offsets = self.get_frame_offsets(stop=stop)
+        _frame_offsets = self._collect_frame_offsets(stop=stop)
         nframes = len(_frame_offsets)
 
         # Calculate actual start with nframes
@@ -97,28 +94,24 @@ class BaseReader(metaclass=ABCMeta):
         # Validate ranges
         if not 0 <= start < nframes or stop > nframes:
             raise ValueError(f"frames [{start}, {stop}) exceed range [0, {nframes}).")
+        return _frame_offsets[start:stop:step]
+
+    def _read_frames_internal(self, frame_offsets: list[int]) -> Generator[MDState, None, None]:
+        if self._file is None:
+            raise RuntimeError("File is not open. Use 'with' statement.")
 
         self._file.seek(0)
-        for offset in _frame_offsets[start:stop:step]:
+        for offset in frame_offsets:
             self._file.seek(offset)
             yield self._make_mdstate(self._file)
 
+    def iread(self, frames: int | str = "0", verbose: bool = False) -> Generator[MDState, None, None]:
+        frame_offsets = self.get_frame_offsets(frames=frames)
+        iterator = self._read_frames_internal(frame_offsets=frame_offsets)
+        if verbose:
+            iterator = tqdm(iterator, total=len(frame_offsets), desc=f"Read File({self.fmt})")
+        return iterator
+
     def read(self, frames: int | str = "0", *, verbose: bool = False) -> List[MDState]:
         with self:
-            iterator = self.iread(frames)
-            if verbose:
-                idx = str_to_idx(str(frames))
-                is_int = isinstance(idx, int)
-                if is_int:
-                    total = 1
-                else:
-                    stop = idx.stop
-                    if stop is None:
-                        total = None
-                    else:
-                        start = idx.start or 0
-                        step = idx.step or 1
-
-                        total = len(range(start, stop, step))
-                iterator = tqdm(iterator, total=total, desc=f"Read File({self.fmt})")
-            return list(iterator)
+            return list(self.iread(frames=frames, verbose=verbose))

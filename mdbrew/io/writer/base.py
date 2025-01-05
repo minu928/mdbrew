@@ -2,6 +2,8 @@ from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from typing import TextIO, Iterable, Sequence
 
+from tqdm import tqdm
+
 from mdbrew._core import MDState, MDStateAttr
 
 
@@ -57,7 +59,7 @@ class BaseWriter(metaclass=ABCMeta):
             if not self._is_valid_attr(mdstate, attr_name):
                 raise ValueError(f"MDState {attr_name} is empty")
 
-    def write(self, mdstates: MDState | Iterable[MDState], mode: str = "w") -> None:
+    def write(self, mdstates: MDState | Iterable[MDState], mode: str = "w", *, verbose: bool = False) -> None:
         if isinstance(mdstates, MDState):
             mdstates = iter([mdstates])
         elif isinstance(mdstates, Iterable):
@@ -66,6 +68,9 @@ class BaseWriter(metaclass=ABCMeta):
             raise ValueError("Input must be MDState or iterable of MDState objects")
 
         self._mode = mode
+
+        if verbose:
+            mdstates = tqdm(mdstates, total=len(mdstates), desc=f"Write File({self.fmt})")
 
         with self:
             for mdstate in mdstates:

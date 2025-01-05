@@ -40,9 +40,10 @@ def get_writer(filepath: str, *, fmt: str | None = None, **kwargs) -> Writer:
 def write(
     filepath: str,
     mdstates: MDState | Iterator[MDState],
-    *,
     mode: str = "w",
+    *,
     fmt: str | None = None,
+    verbose: bool = False,
     **kwargs,
 ) -> None:
-    return get_writer(filepath=filepath, fmt=fmt, **kwargs).write(mdstates=mdstates, mode=mode)
+    return get_writer(filepath=filepath, fmt=fmt, **kwargs).write(mdstates=mdstates, mode=mode, verbose=verbose)
