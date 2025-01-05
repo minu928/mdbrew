@@ -38,38 +38,48 @@ class Prefix:
     q = 1e-30
 
 
+class UnitMeta(type):
+    def __repr__(cls):
+        attrs = {
+            key: value
+            for key, value in vars(cls).items()
+            if not key.startswith("__") and isinstance(value, (int, float))
+        }
+        return f"{cls.__name__}{attrs}"
+
+
 # Base SI units
 @dataclass
-class Length:
+class Length(metaclass=UnitMeta):
     bohr: float = BOHR_RADIUS
     m: float = 1.0
     angstrom: float = 1e-8
 
 
 @dataclass
-class Time:
+class Time(metaclass=UnitMeta):
     s: float = 1.0
 
 
 @dataclass
-class Mass:
+class Mass(metaclass=UnitMeta):
     g: float = 1e-3
 
 
 @dataclass
-class Temperature:
+class Temperature(metaclass=UnitMeta):
     K: float = 1.0
 
 
 @dataclass
-class Charge:
+class Charge(metaclass=UnitMeta):
     C = 1.0
     e = ELECTRON_CHARGE
 
 
 # Derived SI units
 @dataclass
-class Energy:
+class Energy(metaclass=UnitMeta):
     eV: float = ELECTRON_CHARGE
     hatree: float = HATREE_ENERGY
     J: float = 1.0
@@ -77,13 +87,13 @@ class Energy:
 
 
 @dataclass
-class Force:
+class Force(metaclass=UnitMeta):
     N: float = 1.0
     newton: float = 1.0
 
 
 @dataclass
-class Pressure:
+class Pressure(metaclass=UnitMeta):
     Pa: float = 1.0
     bar: float = 1e-5
     atm: float = 9.86921e-6
