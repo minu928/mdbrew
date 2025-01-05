@@ -1,16 +1,22 @@
 from abc import abstractmethod, ABCMeta
-from typing import Iterator, Optional
+from typing import Iterator
 
 import numpy as np
 from numpy.typing import NDArray
 from tqdm import tqdm
 
-from mdbrew.utils.space import convert_to_box_vec, apply_pbc, calculate_distance
+from mdbrew.utils.space import apply_pbc, calculate_distance
 
 
 class BaseRDF(metaclass=ABCMeta):
     def __init__(
-        self, x1, x2, box: Optional[NDArray] = None, *, nbins: int = 250, range: tuple[float, float] = (0, 6)
+        self,
+        x1,
+        x2,
+        box: NDArray | None = None,
+        *,
+        nbins: int = 250,
+        range: tuple[float, float] = (0.0, 6.0),
     ):
         self._x1 = self._update_x(x1)
         self._x2 = self._update_x(x2)
@@ -28,25 +34,33 @@ class BaseRDF(metaclass=ABCMeta):
         self._dr = (range[1] - range[0]) / (nbins + 1)
         self._factor_base = 4.0 * np.pi * self._dr
 
+        self._is_run = False
+
     def __repr__(self):
-        return "RDF"
+        return f"RDF(nx1={self._nx1}, nx2={self._nx2}, is_run={self._is_run})"
 
     @property
     def radii(self) -> NDArray[np.float_]:
+        if not self._is_run:
+            raise RuntimeError("RDF not calculated. Call run() first.")
         return self._radii
 
     @property
     def rdf(self) -> NDArray[np.float_]:
+        if not self._is_run:
+            raise RuntimeError("RDF not calculated. Call run() first.")
         return self._rdf
 
     @property
     def cn(self) -> NDArray[np.float_]:
+        if not self._is_run:
+            raise RuntimeError("RDF not calculated. Call run() first.")
         return self._cn
 
     def run(self, start: int = 0, stop: int | None = None, step: int = 1, *, verbose: bool = False):
         iteration = self._update_iteration(start=start, stop=stop, step=step)
         if verbose:
-            iteration = tqdm(iteration, desc="Calculating RDF")
+            iteration = tqdm(iteration, desc="Calculating RDF", unit="frame")
 
         _hist = np.zeros(self._nbins, dtype=np.int64)
         _rdf = np.zeros(self._nbins, dtype=np.float64)
@@ -68,6 +82,8 @@ class BaseRDF(metaclass=ABCMeta):
 
         self._rdf = _rdf
         self._cn = _cn
+
+        self._is_run = True
         return self
 
     @abstractmethod

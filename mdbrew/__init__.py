@@ -10,8 +10,8 @@ from . import io
 from . import utils
 from . import unit
 from . import analysis
-from ._ops import extract
+from ._ops import extract, query
 from ._core import MDState, MDArray, MDUnit
 
 
-__all__ = ["io", "utils", "unit", "analysis", "extract", "MDState", "MDArray", "MDUnit"]
+__all__ = ["io", "utils", "unit", "analysis", "MDState", "MDArray", "MDUnit"]

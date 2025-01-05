@@ -19,6 +19,7 @@ def convert_to_box_matrix(box, *, dtype=None, dim: int = 3):
 
 
 def convert_to_box_vec(box, tol: float = 1e-10):
+    box = np.asarray(box)
     if box.ndim == 2:
         if box.shape[1] != 3:
             raise ValueError("Box shape must be (nframe, 3)")

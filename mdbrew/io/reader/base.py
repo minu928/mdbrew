@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import TextIO, Generator, List
 from abc import abstractmethod, ABCMeta
-from itertools import islice
+
+from tqdm import tqdm
 
 from mdbrew._core import MDState
 
@@ -57,13 +58,12 @@ class BaseReader(metaclass=ABCMeta):
             except EOFError:
                 break
             except Exception as e:
-                raise RuntimeError(f"Unexpected error: {e}")
+                raise RuntimeError(f"Unexpected error: {e}") from e
         return frame_offsets
 
     def generate(self) -> Generator[MDState, None, None]:
         if self._file is None:
             raise RuntimeError("File is not open. Use 'with' statement.")
-
         while True:
             try:
                 yield self._make_mdstate(file=self._file)
@@ -86,8 +86,8 @@ class BaseReader(metaclass=ABCMeta):
         stop = (start + 1) if is_int else (idx.stop or None)
 
         # Get total frames
-        frame_offsets = self.get_frame_offsets(stop=stop)
-        nframes = len(frame_offsets)
+        _frame_offsets = self.get_frame_offsets(stop=stop)
+        nframes = len(_frame_offsets)
 
         # Calculate actual start with nframes
         start = (idx if idx >= 0 else nframes + idx) if is_int else idx.start or 0
@@ -99,10 +99,26 @@ class BaseReader(metaclass=ABCMeta):
             raise ValueError(f"frames [{start}, {stop}) exceed range [0, {nframes}).")
 
         self._file.seek(0)
-        for offset in frame_offsets[start:stop:step]:
+        for offset in _frame_offsets[start:stop:step]:
             self._file.seek(offset)
             yield self._make_mdstate(self._file)
 
-    def read(self, frames: int | str = ":") -> List[MDState]:
+    def read(self, frames: int | str = "0", *, verbose: bool = False) -> List[MDState]:
         with self:
-            return list(self.iread(frames))
+            iterator = self.iread(frames)
+            if verbose:
+                idx = str_to_idx(str(frames))
+                is_int = isinstance(idx, int)
+                if is_int:
+                    total = 1
+                else:
+                    stop = idx.stop
+                    if stop is None:
+                        total = None
+                    else:
+                        start = idx.start or 0
+                        step = idx.step or 1
+
+                        total = len(range(start, stop, step))
+                iterator = tqdm(iterator, total=total, desc=f"Read File({self.fmt})")
+            return list(iterator)

@@ -39,7 +39,7 @@ def get_reader(filepath: str, *, fmt: str | None = None) -> Reader:
     return opener_cls(filepath=filepath)
 
 
-def read(filepath: str, frames: int | str = 0, *, fmt: str | None = None) -> list[MDState]:
+def read(filepath: str, frames: int | str = 0, *, fmt: str | None = None, verbose: bool = True) -> list[MDState]:
     """Read molecular dynamics trajectory file and return list of MDState objects.
 
     Parameters
@@ -81,4 +81,4 @@ def read(filepath: str, frames: int | str = 0, *, fmt: str | None = None) -> lis
     >>> # Read LAMMPS trajectory explicitly specifying format
     >>> states = read("dump.lammpstrj", fmt="lammpstrj")
     """
-    return get_reader(filepath=filepath, fmt=fmt).read(frames=frames)
+    return get_reader(filepath=filepath, fmt=fmt).read(frames=frames, verbose=verbose)
