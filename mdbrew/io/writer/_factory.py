@@ -1,14 +1,14 @@
 from pathlib import Path
 from typing import Iterator
 
-from mdbrew.errors import NotSupportFileFormat
-from mdbrew.core import MDState
+from mdbrew._core import MDState
 
 from .base import BaseWriter
 from .xyz import XYZWriter
 from .lmps import LMPSWriter
 from .poscar import POSCARWriter
 from .extxyz import EXTXYZWriter
+from .gro import GROWriter
 
 
 Writer = BaseWriter
@@ -19,9 +19,10 @@ registry: WriterRegistry = {
     LMPSWriter.fmt: LMPSWriter,
     POSCARWriter.fmt: POSCARWriter,
     EXTXYZWriter.fmt: EXTXYZWriter,
+    GROWriter.fmt: GROWriter,
 }
 
-WRITER_FORMATS = tuple(registry.keys())
+SUPPORTED_FORMATS = tuple(registry.keys())
 
 
 def get_writer(filepath: str, *, fmt: str | None = None, **kwargs) -> Writer:
@@ -32,7 +33,7 @@ def get_writer(filepath: str, *, fmt: str | None = None, **kwargs) -> Writer:
     try:
         opener_cls = registry[fmt]
     except KeyError:
-        raise NotSupportFileFormat(fmt=fmt, supports=WRITER_FORMATS)
+        raise ValueError(f"File formate {fmt} is not supported. We support {SUPPORTED_FORMATS}.")
     return opener_cls(filepath=filepath, **kwargs)
 
 

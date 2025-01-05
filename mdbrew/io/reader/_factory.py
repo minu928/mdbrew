@@ -1,7 +1,6 @@
 from pathlib import Path
 
-from mdbrew.errors import NotSupportFileFormat
-from mdbrew.core import MDState
+from mdbrew._core import MDState
 from .base import BaseReader
 from .xyz import XYZReader
 from .extxyz import EXTXYZReader
@@ -36,7 +35,7 @@ def get_reader(filepath: str, *, fmt: str | None = None) -> Reader:
     try:
         opener_cls = registry[fmt]
     except KeyError:
-        raise NotSupportFileFormat(fmt=fmt, supports=SUPPORTED_FORMATS)
+        raise ValueError(f"File formate {fmt} is not supported. We support {SUPPORTED_FORMATS}.")
     return opener_cls(filepath=filepath)
 
 

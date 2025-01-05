@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from typing import TextIO, Iterable, Sequence
 
-from mdbrew.core import MDState, MDStateAttr
+from mdbrew._core import MDState, MDStateAttr
 
 
 class BaseWriter(metaclass=ABCMeta):

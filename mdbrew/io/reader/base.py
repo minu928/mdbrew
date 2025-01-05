@@ -3,7 +3,7 @@ from typing import TextIO, Generator, List
 from abc import abstractmethod, ABCMeta
 from itertools import islice
 
-from mdbrew.core import MDState
+from mdbrew._core import MDState
 
 
 def str_to_idx(s: str) -> int | slice:
@@ -68,26 +68,28 @@ class BaseReader(metaclass=ABCMeta):
             try:
                 yield self._make_mdstate(file=self._file)
             except ValueError as e:
-                raise ValueError(f"Error reading atom data: {e}")
+                raise ValueError(f"Error reading atom data: {e}") from e
             except EOFError:
                 break
             except Exception as e:
-                raise RuntimeError(f"Unexpected error: {e}")
+                raise RuntimeError(f"Unexpected error: {e}") from e
 
-    def read(self, frames: int | str = ":") -> List[MDState]:
+    def iread(self, frames: int | str = ":") -> Generator[MDState, None, None]:
+        if self._file is None:
+            raise RuntimeError("File is not open. Use 'with' statement.")
+
         idx = str_to_idx(str(frames))
 
         # Parse slice first to get stop
         is_int = isinstance(idx, int)
-        start = idx if is_int else idx.start or 0  # temporary start before nframes adjustment
-        stop = (start + 1) if is_int else (idx.stop or None)  # None means all frames
+        start = idx if is_int else idx.start or 0
+        stop = (start + 1) if is_int else (idx.stop or None)
 
         # Get total frames
-        with self:
-            frame_offsets = self.get_frame_offsets(stop=stop)
-            nframes = len(frame_offsets)
+        frame_offsets = self.get_frame_offsets(stop=stop)
+        nframes = len(frame_offsets)
 
-        # Now calculate actual start with nframes (for negative indexing)
+        # Calculate actual start with nframes
         start = (idx if idx >= 0 else nframes + idx) if is_int else idx.start or 0
         stop = (start + 1) if is_int else (idx.stop or nframes)
         step = 1 if is_int else (idx.step or 1)
@@ -96,10 +98,11 @@ class BaseReader(metaclass=ABCMeta):
         if not 0 <= start < nframes or stop > nframes:
             raise ValueError(f"frames [{start}, {stop}) exceed range [0, {nframes}).")
 
+        self._file.seek(0)
+        for offset in frame_offsets[start:stop:step]:
+            self._file.seek(offset)
+            yield self._make_mdstate(self._file)
+
+    def read(self, frames: int | str = ":") -> List[MDState]:
         with self:
-            self._file.seek(frame_offsets[start])
-            return (
-                list(islice(self.generate(), 0, stop - start))
-                if step == 1
-                else [next(self.generate()) for _ in range(start, stop, step)]
-            )
+            return list(self.iread(frames))

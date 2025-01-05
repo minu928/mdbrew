@@ -1,7 +1,7 @@
 from typing import Literal
 from dataclasses import dataclass, fields
 
-from .mdarray import MDArray
+from ._mdarray import MDArray
 
 
 # fmt: off

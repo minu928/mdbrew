@@ -2,7 +2,7 @@ from typing import TextIO
 
 from numpy import column_stack, savetxt
 
-from mdbrew.core import MDState
+from mdbrew._core import MDState
 
 from .base import BaseWriter
 

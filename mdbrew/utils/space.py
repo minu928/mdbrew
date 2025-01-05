@@ -42,8 +42,8 @@ def calculate_volume(box, *, dtype=None) -> None:
 
 
 def apply_pbc(vec, box):
-    box = np.ascontiguousarray(box, dtype=None)
-    vec = np.ascontiguousarray(vec, dtype=None)
+    box = np.asarray(box, dtype=None)
+    vec = np.asarray(vec, dtype=None)
     half_box = box * 0.5
     return np.mod(vec + half_box, box) - half_box
 

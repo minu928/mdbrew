@@ -1,6 +1,6 @@
 from typing import Iterator
 
-from mdbrew.core import MDState, MDStateAttr, MDArray
+from mdbrew._core import MDState, MDStateAttr, MDArray
 
 
 def extract(mdstates: Iterator[MDState], name: MDStateAttr, *, dtype: None = None) -> MDArray:

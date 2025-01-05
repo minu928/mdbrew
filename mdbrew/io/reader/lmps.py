@@ -1,6 +1,6 @@
 from typing import TextIO
 
-from mdbrew.core import MDState
+from mdbrew._core import MDState
 from mdbrew.utils.space import convert_to_box_matrix
 
 from .base import BaseReader

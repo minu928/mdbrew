@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from numpy import array, diag, column_stack
 
-from mdbrew.core import MDState
+from mdbrew._core import MDState
 
 from .base import BaseReader
 

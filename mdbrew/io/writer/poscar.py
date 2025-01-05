@@ -2,7 +2,7 @@ from typing import TextIO
 
 from numpy import unique, where, savetxt
 
-from mdbrew.core import MDState
+from mdbrew._core import MDState
 
 from .base import BaseWriter
 
