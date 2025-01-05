@@ -7,15 +7,17 @@ except:
     __version__ = "none"
 
 from . import io
-from ._core import state, array
 from . import utils
 from . import errors
+from . import unit
 
+from ._core import state, array
 
 __all__ = [
     "io",
+    "errors",
+    "utils",
+    "unit",
     "state",
     "array",
-    "utils",
-    "errors",
 ]
