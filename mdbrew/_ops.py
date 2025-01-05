@@ -1,8 +1,7 @@
-from collections.abc import Iterable
-
 from numpy import where
 
 from mdbrew._core import MDState, MDArray, MDStateAttr
+from mdbrew.utils.check import check_mdstates
 
 
 def extract(mdstates: list[MDState], name: MDStateAttr, *, dtype=None) -> MDArray:
@@ -27,10 +26,7 @@ def extract(mdstates: list[MDState], name: MDStateAttr, *, dtype=None) -> MDArra
     ValueError
         If mdstates is empty or not iterable.
     """
-    if not isinstance(mdstates, Iterable):
-        raise TypeError("mdstates must be iterable")
-    if not mdstates:
-        raise ValueError("mdstates is empty")
+    check_mdstates(mdstates=mdstates)
     _type = MDState.get_type(name=name)
     return _type([mdstate.get(name=name) for mdstate in mdstates], dtype=dtype)
 
@@ -57,11 +53,8 @@ def query(mdstates: list[MDState], what: str) -> MDArray[int]:
     TypeError
         If mdstates is not iterable.
     """
-    if not isinstance(mdstates, Iterable):
-        raise TypeError("mdstates must be iterable")
-    if not mdstates:
-        raise ValueError("mdstates is empty")
+    check_mdstates(mdstates=mdstates)
     atoms = mdstates[0].atom
     if atoms is None:
-        raise ValueError("No atom data in first MDState")
+        raise ValueError("No atom data in MDState")
     return where(atoms.flatten() == what)[0]
