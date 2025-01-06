@@ -35,7 +35,7 @@ MDStateAttr = Literal[
 ]
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, repr=False)
 class MDState:
     atom: Atom = None
     atomid: AtomId = None
@@ -55,6 +55,9 @@ class MDState:
             value = getattr(self, field.name)
             if value is not None:
                 setattr(self, field.name, field.type(value))
+
+    def __repr__(self):
+        return f"MDState(data={[f.name for f in fields(self) if getattr(self, f.name) is not None]})"
 
     @classmethod
     def get_type(cls, name: MDStateAttr) -> type[MDArray]:

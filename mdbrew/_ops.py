@@ -31,7 +31,7 @@ def extract(mdstates: list[MDState], name: MDStateAttr, *, dtype=None) -> MDArra
     return _type([mdstate.get(name=name) for mdstate in mdstates], dtype=dtype)
 
 
-def query(mdstates: list[MDState], what: str) -> MDArray[int]:
+def query(mdstates: list[MDState], what: str, name: MDStateAttr = "atom") -> MDArray[int]:
     """Find atom indices matching specified type in first frame.
 
     Parameters
@@ -54,7 +54,7 @@ def query(mdstates: list[MDState], what: str) -> MDArray[int]:
         If mdstates is not iterable.
     """
     check_mdstates(mdstates=mdstates)
-    atoms = mdstates[0].atom
-    if atoms is None:
+    attr = mdstates[0].get(name=name)
+    if attr is None:
         raise ValueError("No atom data in MDState")
-    return where(atoms.flatten() == what)[0]
+    return where(attr.flatten() == what)[0]
