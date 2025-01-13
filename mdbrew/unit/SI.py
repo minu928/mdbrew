@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 
 
 AVOGADRO = 6.02214076e23  # None
@@ -52,8 +52,8 @@ class UnitMeta(type):
 @dataclass
 class Length(metaclass=UnitMeta):
     bohr: float = BOHR_RADIUS
+    angstrom: float = 1e-10
     m: float = 1.0
-    angstrom: float = 1e-8
 
 
 @dataclass

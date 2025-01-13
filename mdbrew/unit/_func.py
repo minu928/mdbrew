@@ -1,10 +1,10 @@
+import re
 from dataclasses import fields
 
 from mdbrew.unit.SI import UNIT_CLASSES, Prefix
 
 
 def get_unit_class(unit: str):
-    """Find appropriate unit class for given base unit."""
     for cls in UNIT_CLASSES:
         if any(unit.endswith(field.name) for field in fields(cls)):
             return cls
@@ -46,6 +46,47 @@ def parse_unit(unit: str) -> tuple[float, str]:
     return factor, base_unit
 
 
+def calculate_unit_value(unit: str):
+    try:
+        return float(unit)
+    except:
+        scale_factor, base_unit = parse_unit(unit=unit)
+        unit_class = get_unit_class(base_unit)
+        return scale_factor * getattr(unit_class, base_unit)
+
+
+def tokenize_unit_expression(expression: str) -> list:
+    return re.findall(r"[*/^]|[^*/^]+", expression)
+
+
+def parse_expression(tokens: list) -> float:
+    i = 1
+    while i < len(tokens):
+        if tokens[i] == "^":
+            base = calculate_unit_value(tokens[i - 1])
+            exponent = float(tokens[i + 1])
+            tokens[i - 1 : i + 2] = [base**exponent]
+        else:
+            i += 1
+    result = calculate_unit_value(tokens[0])
+    i = 1
+    while i < len(tokens):
+        if tokens[i] == "/":
+            result /= calculate_unit_value(tokens[i + 1])
+            i += 2
+        elif tokens[i] == "*":
+            result *= calculate_unit_value(tokens[i + 1])
+            i += 2
+        else:
+            i += 1
+    return result
+
+
+def evaluate_unit_expression(expression: str) -> float:
+    tokens = tokenize_unit_expression(expression)
+    return parse_expression(tokens)
+
+
 def clean_number(value: float, precision: int = 10) -> float:
     """Clean number representation for unit conversions."""
     threshold = 10 ** (-precision)  # 동적 임계값 설정
@@ -66,25 +107,11 @@ def convert(expr: str, *, sep: str = "->", precision: int = 10):
         0.1
     """
     seperated_expr = str(expr).split(sep=sep)
-    match len(seperated_expr):
-        case 2:
-            from_unit = seperated_expr[0].strip()
-            to_unit = seperated_expr[1].strip()
-            # Parse units
-            from_factor, from_base = parse_unit(from_unit)
-            to_factor, to_base = parse_unit(to_unit)
+    if len(seperated_expr) != 2:
+        raise ValueError(f"Expression must include one sep({sep}), such as 'km->m'")
 
-            # Get unit class
-            unit_class = get_unit_class(from_base)
-            if unit_class is not get_unit_class(to_base):
-                raise ValueError(f"Incompatible units: {from_unit} -> {to_unit}")
+    from_expr = seperated_expr[0].strip()
+    to_expr = seperated_expr[1].strip()
 
-            # Apply both SI prefix and base unit conversions
-            base_from_factor = getattr(unit_class, from_base)
-            base_to_factor = getattr(unit_class, to_base)
-
-            factor = (from_factor * base_from_factor) / (to_factor * base_to_factor)
-            return clean_number(factor, precision=precision)
-
-        case _:
-            raise ValueError(f"Expression must include one sep({sep}), such as 'km->m'")
+    factor = evaluate_unit_expression(from_expr) / evaluate_unit_expression(to_expr)
+    return clean_number(factor, precision=precision)
