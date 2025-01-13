@@ -14,7 +14,7 @@ from . import unit
 from . import analysis
 from . import space
 from . import chemistry
-from ._ops import extract
+from ._ops import extract, where
 from .type import MDState, MDUnit, MDStateAttr, MDUnitAttr
 
 

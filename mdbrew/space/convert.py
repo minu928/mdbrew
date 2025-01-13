@@ -1,4 +1,5 @@
 import numpy as np
+
 from mdbrew.utils.check import is_diagonal_matrix
 
 
@@ -35,25 +36,3 @@ def convert_to_box_vec(box, tol: float = 1e-10):
         return box.diagonal(axis1=1, axis2=2)
 
     raise ValueError("Box must be 2D or 3D array")
-
-
-def calculate_volume(box, *, dtype=None) -> None:
-    a, b, c = convert_to_box_matrix(box=box, dtype=dtype)
-    return np.cross(a, b) @ c
-
-
-def apply_pbc(vec, box):
-    box = np.asarray(box, dtype=None)
-    vec = np.asarray(vec, dtype=None)
-    half_box = box * 0.5
-    return np.mod(vec + half_box, box) - half_box
-
-
-def wrap(coord, box):
-    box = np.asarray(box, dtype=None)
-    coord = np.asarray(coord, dtype=None)
-    return np.mod(coord, box)
-
-
-def calculate_distance(vec):
-    return np.sqrt(np.sum(np.square(vec), axis=-1))

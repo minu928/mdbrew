@@ -31,5 +31,5 @@ def extract(mdstates: list[MDState], name: MDStateAttr, *, dtype=None) -> MDArra
     return _type([mdstate.get(name=name) for mdstate in mdstates], dtype=dtype)
 
 
-def where(condition):
+def where(condition, /):
     return np.where(condition)
