@@ -1,5 +1,5 @@
 from . import rdf
-from ._autocorrelate import autocorrelate
+from ._acf import autocorrelate
 
 
 __all__ = ["rdf", "autocorrelate"]
