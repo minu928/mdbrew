@@ -3,7 +3,7 @@ from typing import Iterable
 import numpy as np
 from numpy.typing import NDArray
 
-from mdbrew._core import MDState
+from mdbrew.type import MDState
 
 
 def is_diagonal_matrix(matrix: NDArray, tol: float = 1e-10) -> bool:

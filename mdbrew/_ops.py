@@ -1,6 +1,6 @@
 from numpy import where
 
-from mdbrew._core import MDState, MDArray, MDStateAttr
+from mdbrew.type import MDState, MDArray, MDStateAttr
 from mdbrew.utils.check import check_mdstates
 
 

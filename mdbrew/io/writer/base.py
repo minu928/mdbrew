@@ -4,7 +4,7 @@ from typing import TextIO, Iterable, Sequence
 
 from tqdm import tqdm
 
-from mdbrew._core import MDState, MDStateAttr
+from mdbrew.type import MDState, MDStateAttr
 
 
 class BaseWriter(metaclass=ABCMeta):

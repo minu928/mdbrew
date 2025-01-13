@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Iterator
 
-from mdbrew._core import MDState
+from mdbrew.type import MDState
 
 from .base import BaseWriter
 from .xyz import XYZWriter

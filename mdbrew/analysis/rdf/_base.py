@@ -5,7 +5,7 @@ import numpy as np
 from numpy.typing import NDArray
 from tqdm import tqdm
 
-from mdbrew.utils.space import apply_pbc, calculate_distance
+from mdbrew.space import apply_pbc, calculate_distance
 
 
 class BaseRDF(metaclass=ABCMeta):

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from mdbrew._core import MDState
+from mdbrew.type import MDState
 from .base import BaseReader
 from .xyz import XYZReader
 from .extxyz import EXTXYZReader

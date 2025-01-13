@@ -2,7 +2,7 @@ from typing import Iterable
 from numpy import asarray
 from numpy.typing import NDArray, ArrayLike
 
-from mdbrew.utils.space import convert_to_box_vec
+from mdbrew.space import convert_to_box_vec
 from ._base import BaseRDF
 
 

@@ -4,7 +4,7 @@ from abc import abstractmethod, ABCMeta
 
 from tqdm import tqdm
 
-from mdbrew._core import MDState
+from mdbrew.type import MDState
 
 
 def str_to_idx(s: str) -> int | slice:

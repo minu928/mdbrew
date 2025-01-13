@@ -1,6 +1,6 @@
 from typing import TextIO
 
-from mdbrew._core import MDState
+from mdbrew.type import MDState
 
 from .base import BaseReader
 

@@ -1,4 +1,4 @@
-from . import space
+from .. import space
 from . import check
 
 
