@@ -22,8 +22,7 @@ class EXTXYZWriter(BaseWriter):
         attr_line = self.__make_attr_line(mdstate=mdstate)
         prop_line, prop_data = self.__make_prop_info(mdstate=mdstate)
         header = f'{attr_line} {prop_line} pbc="T T T"'
-
-        file.write(f"{len(prop_data)}\n{header}\n")
+        file.write(f"{len(prop_data[0])}\n{header}\n")
         savetxt(file, column_stack(prop_data), fmt="%s", delimiter=" ")
 
     def __make_attr_line(self, mdstate: MDState) -> str:

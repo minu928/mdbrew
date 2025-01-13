@@ -18,7 +18,7 @@ class XYZReader(BaseReader):
         coord_list = []
         for _ in range(natoms):
             atom, x, y, z = file.readline().split()
-            atom_list.append([atom])
+            atom_list.append(atom)
             coord_list.append([float(x), float(y), float(z)])
         return MDState(atom=atom_list, coord=coord_list, atomid=range(1, natoms + 1))
 

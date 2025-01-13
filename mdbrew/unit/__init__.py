@@ -1,5 +1,5 @@
 from . import SI
-from ._func import convert
+from ._core import convert
 
 
 __all__ = ["SI", "convert"]

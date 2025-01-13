@@ -14,8 +14,8 @@ from . import unit
 from . import analysis
 from . import space
 from . import chemistry
-from ._ops import extract, query
-from .type import MDState, MDArray, MDUnit, MDStateAttr, MDUnitAttr
+from ._ops import extract
+from .type import MDState, MDUnit, MDStateAttr, MDUnitAttr
 
 
 __all__ = [
@@ -26,6 +26,7 @@ __all__ = [
     "analysis",
     "chemistry",
     "MDState",
-    "MDArray",
+    "MDStateAttr",
     "MDUnit",
+    "MDUnitAttr",
 ]

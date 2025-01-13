@@ -53,7 +53,7 @@ class EXTXYZReader(BaseReader):
             values = file.readline().split()
             for (name, size), idx in zip(columns, col_idx):
                 if name == "species":
-                    data[name].append([values[idx]])
+                    data[name].append(values[idx])
                 else:
                     data[name].append([float(x) for x in values[idx : idx + size]])
         data.update({self.PROPERTY_MAP[k]: data.pop(k) for k in self.PROPERTY_MAP if k in data})

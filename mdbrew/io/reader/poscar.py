@@ -23,7 +23,7 @@ class POSCARReader(BaseReader):
         # Elements and counts
         elements = file.readline().split()
         element_counts = file.readline().split()
-        atoms = [[element] for element, count in zip(elements, element_counts) for _ in range(int(count))]
+        atoms = [element for element, count in zip(elements, element_counts) for _ in range(int(count))]
 
         # Skip coordinate type
         next(file)

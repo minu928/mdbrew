@@ -16,7 +16,7 @@ def find_column_indices(columns, targets):
 def check_atomindices(atomindices: list[int]):
     natomindices = len(atomindices)
     if natomindices == 1:
-        return atomindices  # "type"
+        return [atomindices[0]]  # "type"
     return [atomindices[-1]]  # "element"
 
 
@@ -63,7 +63,7 @@ class LAMMPSTRJReader(BaseReader):
         for _ in range(natoms):
             atom_values = file.readline().split()
             for name, indices in self._data_indices.items():
-                data[name].append([atom_values[i] for i in indices])
+                data[name].append(atom_values[indices[0]] if len(indices) == 1 else [atom_values[i] for i in indices])
         return MDState(**data, box=box)
 
     def modify_property_columns(self, **kwargs):

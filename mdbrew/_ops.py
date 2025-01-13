@@ -1,4 +1,4 @@
-from numpy import where
+import numpy as np
 
 from mdbrew.type import MDState, MDArray, MDStateAttr
 from mdbrew.utils.check import check_mdstates
@@ -31,30 +31,5 @@ def extract(mdstates: list[MDState], name: MDStateAttr, *, dtype=None) -> MDArra
     return _type([mdstate.get(name=name) for mdstate in mdstates], dtype=dtype)
 
 
-def query(mdstates: list[MDState], what: str, name: MDStateAttr = "atom") -> MDArray[int]:
-    """Find atom indices matching specified type in first frame.
-
-    Parameters
-    ----------
-    mdstates : list[MDState]
-        List of MDState objects to search in.
-    what : str
-        Atom type to search for.
-
-    Returns
-    -------
-    MDArray[int]
-        Indices where atom type matches.
-
-    Raises
-    ------
-    ValueError
-        If mdstates is empty or first state has no atom data.
-    TypeError
-        If mdstates is not iterable.
-    """
-    check_mdstates(mdstates=mdstates)
-    attr = mdstates[0].get(name=name)
-    if attr is None:
-        raise ValueError("No atom data in MDState")
-    return where(attr.flatten() == what)[0]
+def where(condition):
+    return np.where(condition)
