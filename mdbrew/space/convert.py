@@ -13,6 +13,8 @@ def convert_to_box_matrix(box, *, dtype=None, dim: int = 3):
         return np.eye(dim) * box
     elif ndim == 1 and shape[0] == dim:
         return np.diag(box)
+    elif ndim == 1 and shape[0] == 9:
+        return box.reshape(3, 3)
     elif ndim == 2 and shape == (dim, dim):
         return box
     else:
