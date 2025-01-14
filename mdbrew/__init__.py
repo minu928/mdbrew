@@ -14,9 +14,7 @@ from . import unit
 from . import analysis
 from . import space
 from . import chemistry
-from ._ops import extract, where
-from .type import MDState, MDUnit, MDStateAttr, MDUnitAttr
-
+from . import type
 
 __all__ = [
     "io",
@@ -25,8 +23,9 @@ __all__ = [
     "space",
     "analysis",
     "chemistry",
-    "MDState",
-    "MDStateAttr",
-    "MDUnit",
-    "MDUnitAttr",
+    "type",
 ]
+
+from ._ops import extract, where
+
+__all__.extend(["extract", "where"])
