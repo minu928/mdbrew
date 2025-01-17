@@ -1,6 +1,8 @@
 import numpy as np
+from numpy.typing import NDArray
+import numba as nb
 
-from .convert import convert_to_box_matrix
+from .core import convert_to_box_matrix
 
 
 def calculate_volume(box, *, dtype=None) -> None:
@@ -8,7 +10,8 @@ def calculate_volume(box, *, dtype=None) -> None:
     return np.cross(a, b) @ c
 
 
-def calculate_distance(vec):
+@nb.njit
+def calculate_distance(vec: NDArray):
     return np.sqrt(np.sum(np.square(vec), axis=-1))
 
 
@@ -18,13 +21,12 @@ def calculate_virial(box, stress, *, dtype=None):
     return stress * calculate_volume(box=box, dtype=dtype)
 
 
-def calculate_angle(vec1, vec2, *, rad2deg: bool = False, dtype=None):
-    vec1 = np.asarray(vec1)
-    vec2 = np.asarray(vec2)
+@nb.njit
+def calculate_angle(vec1: NDArray, vec2: NDArray, rad2deg: bool = False):
     dot_product = np.sum(vec1 * vec2, axis=-1)
-    norm_v1 = np.linalg.norm(vec1, axis=-1)
-    norm_v2 = np.linalg.norm(vec2, axis=-1)
-    angle = np.arccos(dot_product / (norm_v1 * norm_v2), dtype=dtype)
+    norm_v1 = calculate_distance(vec1)
+    norm_v2 = calculate_distance(vec2)
+    angle = np.arccos(dot_product / (norm_v1 * norm_v2))
     if rad2deg:
         angle = np.rad2deg(angle)
     return angle

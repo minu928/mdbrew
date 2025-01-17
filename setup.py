@@ -15,7 +15,10 @@ setup(
     author="Minwoo Kim",
     author_email="minu928@snu.ac.kr",
     url="https://github.com/minu928/mdbrew",
-    install_requies=["numpy>=1.23.5,<2.0.0"],
+    install_requies=[
+        "numpy>=1.23.5,<2.0.0",
+        "numba>=0.60.0",
+    ],
     description="Postprocessing tools for the Molecular Dynamics simulation",
     packages=find_packages(),
     keywords=["MD", "LAMMPS", "GROMACS"],
