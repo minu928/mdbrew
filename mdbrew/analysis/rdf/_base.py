@@ -58,9 +58,13 @@ class BaseRDF(metaclass=ABCMeta):
         return self._cn
 
     def run(self, start: int = 0, stop: int | None = None, step: int = 1, *, verbose: bool = False):
+        if len(self._x1) != len(self._x2):
+            raise ValueError("x1 and x2's frames are must be same.")
+        stop = stop or len(self._x1)
         iteration = self._update_iteration(start=start, stop=stop, step=step)
+        _max_nframe = (stop - start) // step
         if verbose:
-            iteration = tqdm(iteration, desc="Calculating RDF", unit="frame")
+            iteration = tqdm(iteration, desc="Calculating RDF", unit="frame", total=_max_nframe)
 
         _hist = np.zeros(self._nbins, dtype=np.int64)
         _rdf = np.zeros(self._nbins, dtype=np.float64)
@@ -75,6 +79,11 @@ class BaseRDF(metaclass=ABCMeta):
             _hist[1:] += hist_i[1:]
             _rdf[1:] += hist_i[1:] * np.prod(box)
             nframe += 1
+
+        if _max_nframe != nframe:
+            raise ValueError(
+                f"Something is wrong. number of iteration should be {_max_nframe} but in your data {nframe}"
+            )
 
         factor = self._factor_base * nframe * self._nx1 * self._nx2 * self._radii_square
         _rdf[1:] /= factor[1:]
