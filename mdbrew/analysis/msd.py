@@ -3,8 +3,6 @@ from tqdm import trange
 
 
 class MSD(object):
-    axis_dict = {"frame": 0, "natoms": 1, "dim": -1}
-
     def __init__(self, coords, *, fft: bool = True, dtype: str = float):
         self.dtype = dtype
         self.fft = bool(fft)
@@ -13,21 +11,22 @@ class MSD(object):
 
     def run(self):
         if self.fft:
-            self._result = self._calc_msd_with_fft()
+            self._msd = self._calc_msd_with_fft()
         else:
-            self._result = self._calc_msd_with_window()
+            self._msd = self._calc_msd_with_window()
         return self
 
     @property
-    def result(self):
-        if not hasattr(self, "_result"):
+    def msd(self):
+        if not hasattr(self, "_msd"):
             self.run()
-        return self._result
+        return self._msd
 
     def _calc_msd_with_window(self):
-        msd_list = np.zeros(self.nframes, dtype=float)
         coords = self.coords
-        for frame in trange(1, self.nframe, unit="frame"):
+        nframs = self.nframes
+        msd_list = np.zeros(nframs, dtype=float)
+        for frame in trange(1, nframs, unit="frame"):
             displacement = coords[frame:] - coords[:-frame]
             square_displacement = np.sum(np.square(displacement), axis=-1)
             msd_list[frame] = np.mean(square_displacement)
@@ -37,24 +36,29 @@ class MSD(object):
         S_1 = self._calc_S1()
         S_2 = self._calc_S2()
         msd_list = np.subtract(S_1, 2.0 * S_2)
-        return msd_list.mean(axis=self.axis_dict["natoms"])
+        return msd_list.mean(axis=1)
 
     def _calc_S1(self):
-        empty_matrix = np.zeros(self.position.shape[:2])
-        D = np.square(self.position).sum(axis=self.axis_dict["dim"])
-        D = np.append(D, empty_matrix, axis=self.axis_dict["frame"])
-        Q = 2.0 * np.sum(D, axis=self.axis_dict["frame"])
+        coords = self.coords
+        nframs = self.nframes
+        natoms = self.natoms
+        empty_matrix = np.zeros((nframs, natoms))
+        D = np.square(coords).sum(axis=-1)
+        D = np.append(D, empty_matrix, axis=0)
+        Q = 2.0 * np.sum(D, axis=0)
         S_1 = empty_matrix
-        for m in trange(self.nframe, unit="frame"):
-            Q -= D[m - 1, :] + D[self.nframe - m, :]
-            S_1[m, :] = Q / (self.nframe - m)
+        for m in trange(nframs, unit="frame"):
+            Q -= D[m - 1, :] + D[nframs - m, :]
+            S_1[m, :] = Q / (nframs - m)
         return S_1
 
     def _calc_S2(self):
-        X = np.fft.fft(self.position, n=2 * self.nframe, axis=self.axis_dict["frame"])
+        coords = self.coords
+        nframs = self.nframes
+        X = np.fft.fft(coords, n=2 * nframs, axis=0)
         dot_X = X * X.conjugate()
-        x = np.fft.ifft(dot_X, axis=self.axis_dict["frame"])
-        x = x[: self.nframe].real
-        x = x.sum(axis=self.axis_dict["dim"])
-        n = np.arange(self.nframe, 0, -1)
+        x = np.fft.ifft(dot_X, axis=0)
+        x = x[:nframs].real
+        x = x.sum(axis=-1)
+        n = np.arange(nframs, 0, -1)
         return x / n[:, np.newaxis]
