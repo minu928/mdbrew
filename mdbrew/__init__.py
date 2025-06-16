@@ -29,3 +29,7 @@ __all__ = [
 from ._ops import extract, where
 
 __all__.extend(["extract", "where"])
+
+from .type import state, array
+
+__all__.extend(["state", "array"])

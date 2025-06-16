@@ -10,3 +10,7 @@ __all__ = [
     "MDUnit",
     "MDUnitAttr",
 ]
+
+
+state = MDState
+array = MDArray
