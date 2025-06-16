@@ -61,9 +61,9 @@ class BaseWriter(metaclass=ABCMeta):
 
     def write(self, mdstates: MDState | Iterable[MDState], mode: str = "w", *, verbose: bool = False) -> None:
         if isinstance(mdstates, MDState):
-            mdstates = iter([mdstates])
+            mdstates = list([mdstates])
         elif isinstance(mdstates, Iterable):
-            mdstates = iter(mdstates)
+            mdstates = list(mdstates)
         else:
             raise ValueError("Input must be MDState or iterable of MDState objects")
 
