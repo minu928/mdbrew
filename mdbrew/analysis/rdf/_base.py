@@ -40,19 +40,19 @@ class BaseRDF(metaclass=ABCMeta):
         return f"RDF(nx1={self._nx1}, nx2={self._nx2}, is_run={self._is_run})"
 
     @property
-    def radii(self) -> NDArray[np.float_]:
+    def radii(self) -> NDArray[np.float64]:
         if not self._is_run:
             raise RuntimeError("RDF not calculated. Call run() first.")
         return self._radii
 
     @property
-    def rdf(self) -> NDArray[np.float_]:
+    def rdf(self) -> NDArray[np.float64]:
         if not self._is_run:
             raise RuntimeError("RDF not calculated. Call run() first.")
         return self._rdf
 
     @property
-    def cn(self) -> NDArray[np.float_]:
+    def cn(self) -> NDArray[np.float64]:
         if not self._is_run:
             raise RuntimeError("RDF not calculated. Call run() first.")
         return self._cn
