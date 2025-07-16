@@ -4,7 +4,7 @@ from dataclasses import dataclass, fields
 AVOGADRO = 6.02214076e23  # None
 ELECTRON_CHARGE = 1.602176634e-19  # C
 BOHR_RADIUS = 5.29177210544e-11  # m
-HATREE_ENERGY = 4.3597447222060e-18  # J
+HARTREE_ENERGY = 4.3597447222060e-18  # J
 
 
 @dataclass
@@ -81,7 +81,7 @@ class Charge(metaclass=UnitMeta):
 @dataclass
 class Energy(metaclass=UnitMeta):
     eV: float = ELECTRON_CHARGE
-    hatree: float = HATREE_ENERGY
+    hartree: float = HARTREE_ENERGY
     J: float = 1.0
     cal: float = 4.184
 
@@ -95,9 +95,9 @@ class Force(metaclass=UnitMeta):
 @dataclass
 class Pressure(metaclass=UnitMeta):
     Pa: float = 1.0
-    bar: float = 1e-5
-    atm: float = 9.86921e-6
-    Torr: float = 7.5006e-3
+    bar: float = 1e5
+    atm: float = 101325.0
+    Torr: float = 133.322
 
 
 UNIT_CLASSES = [
