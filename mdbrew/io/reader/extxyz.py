@@ -38,6 +38,7 @@ class EXTXYZReader(BaseReader):
         "position": "coord",
         "forces": "force",
         "force": "force",
+        "momenta": "momenta",
     }
 
     def _make_mdstate(self, file: TextIO) -> MDState:

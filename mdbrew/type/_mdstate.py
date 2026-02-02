@@ -17,7 +17,7 @@ class Velocity(MDArray): ...
 class Charge(MDArray): ...
 class Stress(MDArray): ...
 class Virial(MDArray): ...
-
+class Momenta(MDArray): ...
 # fmt: on
 MDStateAttr = Literal[
     "atom",
@@ -32,6 +32,7 @@ MDStateAttr = Literal[
     "charge",
     "stress",
     "virial",
+    "momenta",
 ]
 
 
@@ -49,6 +50,7 @@ class MDState:
     charge: Charge = None
     stress: Stress = None
     virial: Virial = None
+    momenta: Momenta = None
 
     def __post_init__(self):
         for field in fields(self):

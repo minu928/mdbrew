@@ -6,7 +6,7 @@ from mdbrew.space import convert_to_box_matrix
 from .base import BaseReader
 
 
-calculate_box_length = lambda lb, ub: float(ub) - float(lb)
+calculate_box_length = lambda lb, ub, *_: float(ub) - float(lb)
 
 
 def find_column_indices(columns, targets):
