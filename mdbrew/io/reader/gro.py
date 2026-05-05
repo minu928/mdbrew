@@ -56,12 +56,3 @@ class GROReader(BaseReader):
         [file.readline() for _ in range(natoms)]  # line: data
         file.readline()  # line: box
         return frame_offset
-
-    def _get_frame_offset(self, file: TextIO):
-        frame_offset = file.tell()
-        if not file.readline().strip():
-            raise EOFError
-        natoms = int(file.readline().strip())
-        [file.readline() for _ in range(natoms)]  # line: data
-        file.readline()  # line: box
-        return frame_offset

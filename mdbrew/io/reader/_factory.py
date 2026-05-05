@@ -9,6 +9,7 @@ from .lammpstrj import LAMMPSTRJReader
 from .gro import GROReader
 from .lmps import LMPSReader
 from .pdb import PDBReader
+from .trr import TRRReader
 
 
 Reader = BaseReader
@@ -22,6 +23,7 @@ registry: ReaderRegistry = {
     GROReader.fmt: GROReader,
     LMPSReader.fmt: LMPSReader,
     PDBReader.fmt: PDBReader,
+    TRRReader.fmt: TRRReader,
 }
 
 SUPPORTED_FORMATS = tuple(registry.keys())
