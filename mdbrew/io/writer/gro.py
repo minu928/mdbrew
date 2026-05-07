@@ -6,7 +6,6 @@ from mdbrew.type import MDState
 
 from .base import BaseWriter
 
-
 EXCLUDE_BOX_IDX = -1
 
 
@@ -25,4 +24,4 @@ class GROWriter(BaseWriter):
         file.write(f"GRO written by MDBrew\n{len(mdstate.atom)}\n")
         for v in column_stack([getattr(mdstate, attr) for attr in self._required_attributes[:EXCLUDE_BOX_IDX]]):
             file.write(value2line(v=v))
-        file.write(" ".join(diag(mdstate.box).flatten().astype(str)))
+        file.write(" ".join(diag(mdstate.box).flatten().astype(str)) + "\n")
