@@ -1,7 +1,6 @@
 from pathlib import Path
 from setuptools import setup, find_packages
 
-
 version_dict = {}
 with open(Path(__file__).parents[0] / "mdbrew/_version.py") as this_v:
     exec(this_v.read(), version_dict)

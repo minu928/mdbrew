@@ -15,6 +15,7 @@ from . import analysis
 from . import space
 from . import chemistry
 from . import type
+from .type import state, array
 
 __all__ = [
     "io",
@@ -24,6 +25,8 @@ __all__ = [
     "analysis",
     "chemistry",
     "type",
+    "state",
+    "array",
 ]
 
 from ._ops import extract, where
