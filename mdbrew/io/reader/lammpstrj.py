@@ -5,7 +5,6 @@ from mdbrew.space import convert_to_box_matrix
 
 from .base import BaseReader
 
-
 calculate_box_length = lambda lb, ub: float(ub) - float(lb)
 
 
@@ -30,6 +29,7 @@ class LAMMPSTRJReader(BaseReader):
             "atomid": ["id"],
             "atom": ["type", "element"],
             "coord": ["x", "y", "z"],
+            "coord": ["xu", "yu", "zu"],
             "force": ["fx", "fy", "fz"],
             "velocity": ["vx", "vy", "vz"],
             "charge": ["q"],
