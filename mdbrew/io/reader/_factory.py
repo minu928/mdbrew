@@ -11,6 +11,7 @@ from .gro import GROReader
 from .lmps import LMPSReader
 from .pdb import PDBReader
 from .trr import TRRReader
+from .dcd import DCDReader
 
 Reader = BaseReader
 ReaderRegistry = dict[str, type[BaseReader]]
@@ -24,6 +25,7 @@ registry: ReaderRegistry = {
     LMPSReader.fmt: LMPSReader,
     PDBReader.fmt: PDBReader,
     TRRReader.fmt: TRRReader,
+    DCDReader.fmt: DCDReader,
 }
 
 SUPPORTED_FORMATS = tuple(registry.keys())
