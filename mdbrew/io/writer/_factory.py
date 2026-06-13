@@ -9,6 +9,7 @@ from .lmps import LMPSWriter
 from .poscar import POSCARWriter
 from .extxyz import EXTXYZWriter
 from .gro import GROWriter
+from .dcd import DCDWriter
 
 
 Writer = BaseWriter
@@ -20,6 +21,7 @@ registry: WriterRegistry = {
     POSCARWriter.fmt: POSCARWriter,
     EXTXYZWriter.fmt: EXTXYZWriter,
     GROWriter.fmt: GROWriter,
+    DCDWriter.fmt: DCDWriter,
 }
 
 SUPPORTED_FORMATS = tuple(registry.keys())
