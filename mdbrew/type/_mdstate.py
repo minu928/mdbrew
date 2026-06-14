@@ -80,7 +80,7 @@ class MDState:
     def __getitem__(self, key):
         return MDState(
             box=self.box,
-            position=self.position[key] if self.position is not None else None,
+            coord=self.coord[key] if self.coord is not None else None,
             velocity=self.velocity[key] if self.velocity is not None else None,
             atom=self.atom[key] if self.atom is not None else None,
             atomid=self.atomid[key] if self.atomid is not None else None,
@@ -100,7 +100,7 @@ class MDState:
 
         return MDState(
             box=self.box,
-            position=cat(self.position, other.position),
+            coord=cat(self.coord, other.coord),
             velocity=cat(self.velocity, other.velocity),
             atom=cat(self.atom, other.atom),
             atomid=cat(self.atomid, other.atomid),
@@ -126,7 +126,7 @@ class MDState:
 
     def wrap(self):
         lx, ly, lz = np.diag(self.box)
-        self.position[:, 0] %= lx
-        self.position[:, 1] %= ly
-        self.position[:, 2] %= lz
+        self.coord[:, 0] %= lx
+        self.coord[:, 1] %= ly
+        self.coord[:, 2] %= lz
         return self
