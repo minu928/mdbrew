@@ -71,11 +71,7 @@ class BaseRDF(metaclass=ABCMeta):
 
         nframe = 0
         for x1_i, x2_i, box in iteration:
-            diff = x1_i[:, None, :] - x2_i[None, :, :]
-            pbc_diff = apply_pbc(diff, box=box)
-            distance = calculate_distance(vec=pbc_diff)
-
-            hist_i, _ = np.histogram(distance, bins=self._nbins, range=self._range)
+            hist_i = self._frame_histogram(x1_i, x2_i, box)
             _hist[1:] += hist_i[1:]
             _rdf[1:] += hist_i[1:] * np.prod(box)
             nframe += 1
@@ -94,6 +90,19 @@ class BaseRDF(metaclass=ABCMeta):
 
         self._is_run = True
         return self
+
+    def _frame_histogram(self, x1_i: NDArray, x2_i: NDArray, box: NDArray) -> NDArray:
+        """Histogram of minimum-image pair distances for one frame.
+
+        Default implementation forms the full ``(n1, n2)`` distance matrix.
+        Subclasses may override this with a faster neighbor search that yields
+        the same histogram (see ``KDTreeRDF``).
+        """
+        diff = x1_i[:, None, :] - x2_i[None, :, :]
+        pbc_diff = apply_pbc(diff, box=box)
+        distance = calculate_distance(vec=pbc_diff)
+        hist_i, _ = np.histogram(distance, bins=self._nbins, range=self._range)
+        return hist_i
 
     @abstractmethod
     def _update_x(self, x):
