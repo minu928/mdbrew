@@ -169,6 +169,28 @@ class PeriodicKDTree:
                 chunks.append(np.concatenate(out))
         return np.sqrt(np.concatenate(chunks)) if chunks else np.empty(0, dtype=float)
 
+    def sorted_neighbor_distances(self, x: ArrayLike, r: float, k: int) -> NDArray:
+        """Per query point, the ``k`` smallest minimum-image neighbor distances
+        within radius ``r``, sorted ascending and padded to width ``k`` with
+        ``inf``. Returns shape ``(nqueries, k)``.
+
+        Useful for per-neighbor-shell analyses: column ``i`` holds the distance
+        to each query point's ``i``-th nearest neighbor (``inf`` where fewer than
+        ``k`` neighbors lie within ``r``).
+        """
+        queries = np.mod(np.atleast_2d(np.asarray(x, dtype=float)), self.boxsize)
+        out = np.full((queries.shape[0], int(k)), np.inf)
+        r2 = float(r) * float(r)
+        for i, q in enumerate(queries):
+            chunks: list = []
+            self._radius_dist(self.root, q, r2, chunks)
+            if chunks:
+                d = np.sqrt(np.concatenate(chunks))
+                d.sort()
+                m = min(int(k), d.size)
+                out[i, :m] = d[:m]
+        return out
+
     # -- k nearest neighbors -------------------------------------------------
     def _knn(self, node: _Node, q: NDArray, k: int, heap: list) -> None:
         if node is None:
