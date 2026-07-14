@@ -56,7 +56,6 @@ class BaseReader(metaclass=ABCMeta):
         if self._file:
             self._file.close()
             self._file = None
-            self._get_frame_offset = None
 
     @property
     def filepath(self) -> Path:

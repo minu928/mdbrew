@@ -91,7 +91,7 @@ def read(filepath: str, frames: int | str = 0, *, fmt: str | None = None, verbos
 def iread(
     filepath: str, frames: int | str = 0, *, fmt: str | None = None, verbose: bool = False
 ) -> Generator[MDState, None, None]:
-    """Read molecular dynamics trajectory file and return list of MDState objects.
+    """Read molecular dynamics trajectory file, yielding MDState objects one frame at a time.
 
     Parameters
     ----------
@@ -132,4 +132,5 @@ def iread(
     >>> # Read LAMMPS trajectory explicitly specifying format
     >>> states = read("dump.lammpstrj", fmt="lammpstrj")
     """
-    yield from get_reader(filepath=filepath, fmt=fmt).read(frames=frames, verbose=verbose)
+    with get_reader(filepath=filepath, fmt=fmt) as reader:
+        yield from reader.iread(frames=frames, verbose=verbose)
