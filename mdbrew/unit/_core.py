@@ -5,10 +5,29 @@ from mdbrew.unit.SI import UNIT_CLASSES, Prefix
 
 
 def get_unit_class(unit: str):
+    # Exact base-unit name first, then the longest valid suffix match.
     for cls in UNIT_CLASSES:
-        if any(unit.endswith(field.name) for field in fields(cls)):
+        if any(field.name == unit for field in fields(cls)):
             return cls
-    return None
+    match = _match_base_unit(unit)
+    return match[1] if match else None
+
+
+def _match_base_unit(unit: str) -> tuple[str, type] | None:
+    """Longest base unit (across all unit classes) that ends ``unit`` with a
+    valid (or empty) SI prefix. Returns ``(base_unit, unit_class)`` or None."""
+    best = None
+    for cls in UNIT_CLASSES:
+        for field in fields(cls):
+            name = field.name
+            if not unit.endswith(name):
+                continue
+            prefix = unit[: -len(name)]
+            if prefix and not isinstance(getattr(Prefix, prefix, None), (int, float)):
+                continue
+            if best is None or len(name) > len(best[0]):
+                best = (name, cls)
+    return best
 
 
 def parse_unit(unit: str) -> tuple[float, str]:
@@ -20,39 +39,27 @@ def parse_unit(unit: str) -> tuple[float, str]:
         >>> parse_unit("MPa")
         (1e6, "Pa")
     """
-    # Try to find unit class first
-    unit_class = get_unit_class(unit)
-    if unit_class is None:
+    match = _match_base_unit(unit)
+    if match is None:
         raise ValueError(f"Unknown unit: {unit}")
-
-    # Find all possible base units from the class
-    base_units = [field.name for field in fields(unit_class)]
-    matching_base = [bu for bu in base_units if unit.endswith(bu)]
-    if not matching_base:
-        raise ValueError(f"No matching base unit found for: {unit}")
-
-    # Get the longest matching base unit
-    base_unit = max(matching_base, key=len)
+    base_unit, _ = match
     prefix = unit[: -len(base_unit)]
-
-    # Get prefix factor
-    if prefix:
-        if not hasattr(Prefix, prefix):
-            raise ValueError(f"Unknown SI prefix: {prefix}")
-        factor = getattr(Prefix, prefix)
-    else:
-        factor = 1.0
-
+    factor = getattr(Prefix, prefix) if prefix else 1.0
     return factor, base_unit
+
+
+_COEFF_UNIT = re.compile(r"^([+-]?\d+\.?\d*(?:[eE][+-]?\d+)?)?\s*(.*)$")
 
 
 def calculate_unit_value(unit: str):
     try:
         return float(unit)
-    except:
-        scale_factor, base_unit = parse_unit(unit=unit)
+    except ValueError:
+        number, symbol = _COEFF_UNIT.match(unit.strip()).groups()
+        coeff = float(number) if number else 1.0
+        scale_factor, base_unit = parse_unit(unit=symbol)
         unit_class = get_unit_class(base_unit)
-        return scale_factor * getattr(unit_class, base_unit)
+        return coeff * scale_factor * getattr(unit_class, base_unit)
 
 
 def tokenize_unit_expression(expression: str) -> list:

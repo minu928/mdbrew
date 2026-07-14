@@ -30,14 +30,14 @@ class POSCARWriter(BaseWriter):
         scale = self.__defaults["scale"]
         file.write(f"POSCAR written by MDBrew\n{scale}\n")
 
-        # line: box
-        box = mdstate.box * scale
+        # line: box (readers multiply by the scale factor, so divide here)
+        box = mdstate.box / scale
         for bi in box.astype(str):
             file.write(f"{' '.join(bi)}\n")
 
         # line: elements, counts
         atoms = mdstate.atom
-        coords = mdstate.coord
+        coords = mdstate.coord / scale
 
         elements, counts = unique(atoms, return_counts=True)
         file.write(" ".join(elements) + "\n")

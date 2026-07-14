@@ -16,13 +16,13 @@ PROPERTY_SLICES = {
     "x": slice(30, 38),
     "y": slice(38, 46),
     "z": slice(46, 54),
-    "charge": slice(79, 81),
+    "charge": slice(78, 80),
 }
 
 
 def parse_physicsline(line: str):
     physical_data = {}
-    for p in line.split(","):
+    for p in line.removeprefix("REMARK").split(","):
         p = p.strip()
         if p.startswith("E"):
             physical_data["energy"] = float(p.split("=")[-1])
@@ -42,18 +42,26 @@ class PDBReader(BaseReader):
     fmt = "pdb"
 
     def _make_mdstate(self, file: TextIO):
-        line = file.readline().strip()
-        if not line:
+        line = file.readline()
+        if not line.strip():
             raise EOFError
-        if line.startswith("TITLE"):
+
+        # Header: consume any records (TITLE, AUTHOR, REMARK, ...) until CRYST1.
+        physics = {}
+        while not line.startswith("CRYST1"):
+            if line.startswith(("ATOM", "HETATM")):
+                raise ValueError("PDB frame has no CRYST1 record before atom records.")
+            if line.startswith("REMARK"):
+                physics.update(parse_physicsline(line=line))
             line = file.readline()
-        if line.startswith("AUTHOR"):
-            line = file.readline()
-        if line.startswith("REMARK"):
-            physics = parse_physicsline(line=line)
-        box = parse_boxline(line=file.readline())
+            if not line:
+                raise EOFError
+        box = parse_boxline(line=line)
+
         data = defaultdict(list)
-        while not (line := file.readline()).startswith("END"):
+        while (line := file.readline()) and not line.startswith("END"):
+            if not line.startswith(("ATOM", "HETATM")):
+                continue
             for prop, _slice in PROPERTY_SLICES.items():
                 if prop_data := line[_slice].strip():
                     data[prop].append(prop_data)
@@ -62,16 +70,9 @@ class PDBReader(BaseReader):
 
     def _get_frame_offset(self, file):
         frame_offset = file.tell()
-        line = file.readline().strip()
-        if not line:
+        line = file.readline()
+        if not line.strip():
             raise EOFError
-        if line.startswith("TITLE"):
+        while line and not line.startswith("END"):
             line = file.readline()
-        if line.startswith("AUTHOR"):
-            line = file.readline()
-        if line.startswith("REMARK"):
-            line = file.readline()
-        file.readline()
-        while not (line := file.readline()).startswith("END"):
-            pass
         return frame_offset

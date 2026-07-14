@@ -21,7 +21,8 @@ class EXTXYZWriter(BaseWriter):
     def _write_mdstate(self, file: TextIO, mdstate: MDState) -> None:
         attr_line = self.__make_attr_line(mdstate=mdstate)
         prop_line, prop_data = self.__make_prop_info(mdstate=mdstate)
-        header = f'{attr_line} {prop_line} pbc="T T T"'
+        pbc = "T T T" if mdstate.box is not None else "F F F"
+        header = f'{attr_line} {prop_line} pbc="{pbc}"'
         file.write(f"{len(prop_data[0])}\n{header}\n")
         savetxt(file, column_stack(prop_data), fmt="%s", delimiter=" ")
 

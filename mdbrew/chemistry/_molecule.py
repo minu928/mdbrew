@@ -18,7 +18,9 @@ class Molecule:
     def __mul__(self, num: Union[int, float]) -> "Molecule":
         if not isinstance(num, (int, float)):
             raise TypeError(f"Multiplication requires a number, got {type(num).__name__}")
-        new_formula = "".join(f"{element}{count * num}" for element, count in self._element_dict.items())
+        if num != int(num) or num < 1:
+            raise ValueError(f"Multiplier must be a positive integer, got {num}")
+        new_formula = "".join(f"{element}{count * int(num)}" for element, count in self._element_dict.items())
         return Molecule(new_formula)
 
     def __add__(self, molecule: "Molecule") -> "Molecule":

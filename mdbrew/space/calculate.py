@@ -4,7 +4,7 @@ from numpy.typing import NDArray
 from .core import convert_to_box_matrix
 
 
-def calculate_volume(box, *, dtype=None) -> None:
+def calculate_volume(box, *, dtype=None) -> float:
     a, b, c = convert_to_box_matrix(box=box, dtype=dtype)
     return np.cross(a, b) @ c
 

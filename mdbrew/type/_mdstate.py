@@ -35,6 +35,10 @@ MDStateAttr = Literal[
     "virial",
 ]
 
+# Fields indexed per atom (sliced/concatenated) vs. per frame (passed through).
+PER_ATOM_ATTRS = ("atom", "atomid", "residue", "residueid", "coord", "velocity", "force", "charge")
+PER_FRAME_ATTRS = ("box", "energy", "stress", "virial")
+
 
 @dataclass(slots=True, repr=False)
 class MDState:
@@ -78,15 +82,9 @@ class MDState:
         setattr(self, name, value)
 
     def __getitem__(self, key):
-        return MDState(
-            box=self.box,
-            coord=self.coord[key] if self.coord is not None else None,
-            velocity=self.velocity[key] if self.velocity is not None else None,
-            atom=self.atom[key] if self.atom is not None else None,
-            atomid=self.atomid[key] if self.atomid is not None else None,
-            residue=self.residue[key] if self.residue is not None else None,
-            residueid=self.residueid[key] if self.residueid is not None else None,
-        )
+        data = {name: value[key] for name in PER_ATOM_ATTRS if (value := getattr(self, name)) is not None}
+        data.update({name: value for name in PER_FRAME_ATTRS if (value := getattr(self, name)) is not None})
+        return MDState(**data)
 
     def __add__(self, other: "MDState") -> "MDState":
         def cat(a, b):
@@ -98,15 +96,17 @@ class MDState:
                 return a
             return np.concatenate([a, b])
 
-        return MDState(
-            box=self.box,
-            coord=cat(self.coord, other.coord),
-            velocity=cat(self.velocity, other.velocity),
-            atom=cat(self.atom, other.atom),
-            atomid=cat(self.atomid, other.atomid),
-            residue=cat(self.residue, other.residue),
-            residueid=cat(self.residueid, other.residueid),
+        data = {name: cat(getattr(self, name), getattr(other, name)) for name in PER_ATOM_ATTRS}
+        # Per-frame fields are not concatenable; keep self's, falling back to other's.
+        data.update(
+            {
+                name: value
+                for name in PER_FRAME_ATTRS
+                if (value := getattr(self, name) if getattr(self, name) is not None else getattr(other, name))
+                is not None
+            }
         )
+        return MDState(**data)
 
     def __radd__(self, other):
         if other is None:
@@ -116,8 +116,10 @@ class MDState:
     def __len__(self):
         return len(self.atom)
 
-    def reoder_atomid(self):
+    def reorder_atomid(self):
         self.atomid = np.arange(1, len(self.atom) + 1)
+
+    reoder_atomid = reorder_atomid  # deprecated misspelled alias
 
     def delete(self, key) -> "MDState":
         mask = np.ones(len(self.atom), dtype=bool)
@@ -125,8 +127,8 @@ class MDState:
         return self[mask]
 
     def wrap(self):
-        lx, ly, lz = np.diag(self.box)
-        self.coord[:, 0] %= lx
-        self.coord[:, 1] %= ly
-        self.coord[:, 2] %= lz
+        # Wrap in fractional space so triclinic cells are handled too
+        # (rows of `box` are the cell vectors).
+        frac = self.coord @ np.linalg.inv(self.box)
+        self.coord[:] = (frac % 1.0) @ self.box
         return self

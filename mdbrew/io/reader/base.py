@@ -11,33 +11,6 @@ def str_to_idx(s: str) -> int | slice:
     return int(s) if ":" not in s else slice(*(int(p) if p else None for p in s.split(":")[:3]))
 
 
-def parse_frame_index(frames: int | str) -> tuple[int, int, int]:
-    """Parse frame index into start, stop, step.
-
-    Parameters
-    ----------
-    frames : int or str
-        Frame index or slice string (e.g., ":", "1:10:2")
-
-    Returns
-    -------
-    tuple[int, int, int]
-        Parsed (start, stop, step) values
-    """
-    idx = str_to_idx(str(frames))
-    is_int = isinstance(idx, int)
-
-    start = idx if is_int else idx.start or 0
-    stop = (start + 1) if is_int else idx.stop or None
-    step = 1 if is_int else (idx.step or 1)
-    return start, stop, step
-
-
-def validate_frame_range(start: int, stop: int, nframes: int):
-    if not 0 <= start < nframes or stop > nframes:
-        raise ValueError(f"frames [{start}, {stop}) exceed range [0, {nframes}).")
-
-
 class BaseReader(metaclass=ABCMeta):
     def __init__(self, filepath: str, **kwargs):
         self._filepath = Path(filepath)
@@ -107,25 +80,24 @@ class BaseReader(metaclass=ABCMeta):
                 raise RuntimeError(f"Unexpected error: {e}") from e
         return self._frame_offsets[:stop] if stop else self._frame_offsets
 
-    def calculate_frame_offsets(self, frames: int | str = "0"):
-        # Parse initial range
-        start, stop, step = parse_frame_index(frames=frames)
+    def calculate_frame_offsets(self, frames: int | str = "0") -> List[int]:
+        idx = str_to_idx(str(frames))
 
-        # Get offsets and adjust range
-        offsets = self._collect_frame_offsets(stop=stop)
-        nframes = len(offsets)
+        if isinstance(idx, int):
+            # A non-negative index lets the offset scan stop early.
+            offsets = self._collect_frame_offsets(stop=idx + 1 if idx >= 0 else None)
+            nframes = len(offsets)
+            i = idx if idx >= 0 else nframes + idx
+            if not 0 <= i < nframes:
+                raise ValueError(f"frame {idx} out of range for {nframes} frames.")
+            return [offsets[i]]
 
-        # Adjust negative indices
-        if isinstance(idx := str_to_idx(str(frames)), int):
-            start = idx if idx >= 0 else nframes + idx
-            stop = start + 1
-        else:
-            start = start if start >= 0 else nframes + start
-            stop = stop or nframes
-
-        # Validate and return
-        validate_frame_range(start=start, stop=stop, nframes=nframes)
-        return offsets[start:stop:step]
+        # Slice: scanning can stop early only for a plain forward slice with
+        # non-negative bounds; otherwise the total frame count is needed.
+        start, stop, step = idx.start, idx.stop, idx.step
+        can_bound = (start or 0) >= 0 and stop is not None and stop >= 0 and (step or 1) > 0
+        offsets = self._collect_frame_offsets(stop=stop if can_bound else None)
+        return offsets[idx]
 
     def iread_at(self, frame_offsets: list[int]) -> Generator[MDState, None, None]:
         if self._file is None:

@@ -12,6 +12,7 @@ class BaseWriter(metaclass=ABCMeta):
         self._filepath = Path(filepath)
         self._file: TextIO | None = None
         self._strfmt: str | Sequence[str] | None = None
+        self._mode = "w"
         self._kwargs = kwargs
 
     def __repr__(self) -> str:
@@ -26,7 +27,6 @@ class BaseWriter(metaclass=ABCMeta):
         if self._file is not None:
             self._file.close()
             self._file = None
-            self._mode = "w"
 
     @property
     def filepath(self) -> Path:
@@ -61,16 +61,16 @@ class BaseWriter(metaclass=ABCMeta):
 
     def write(self, mdstates: MDState | Iterable[MDState], mode: str = "w", *, verbose: bool = False) -> None:
         if isinstance(mdstates, MDState):
-            mdstates = list([mdstates])
-        elif isinstance(mdstates, Iterable):
-            mdstates = list(mdstates)
-        else:
+            mdstates = [mdstates]
+        elif not isinstance(mdstates, Iterable):
             raise ValueError("Input must be MDState or iterable of MDState objects")
 
         self._mode = mode
 
         if verbose:
-            mdstates = tqdm(mdstates, total=len(mdstates), desc=f"Write File({self.fmt})")
+            # Generators are consumed lazily; total is only known for sized inputs.
+            total = len(mdstates) if hasattr(mdstates, "__len__") else None
+            mdstates = tqdm(mdstates, total=total, desc=f"Write File({self.fmt})")
 
         with self:
             for mdstate in mdstates:

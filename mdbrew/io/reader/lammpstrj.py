@@ -8,15 +8,12 @@ from .base import BaseReader
 calculate_box_length = lambda lb, ub: float(ub) - float(lb)
 
 
-def find_column_indices(columns, targets):
-    return [columns.index(col) for col in targets if col in columns]
-
-
-def check_atomindices(atomindices: list[int]):
-    natomindices = len(atomindices)
-    if natomindices == 1:
-        return [atomindices[0]]  # "type"
-    return [atomindices[-1]]  # "element"
+def find_column_indices(columns, candidates):
+    """Indices of the first candidate column group fully present in ``columns``."""
+    for group in candidates:
+        if all(col in columns for col in group):
+            return [columns.index(col) for col in group]
+    return []
 
 
 class LAMMPSTRJReader(BaseReader):
@@ -25,14 +22,15 @@ class LAMMPSTRJReader(BaseReader):
     def __init__(self, filepath, **kwargs):
         super().__init__(filepath, **kwargs)
         self._is_column_inspected = False
+        # Each value lists candidate column groups; the first group whose
+        # columns are all present in the file wins.
         self.property_dict = {
-            "atomid": ["id"],
-            "atom": ["type", "element"],
-            "coord": ["x", "y", "z"],
-            "coord": ["xu", "yu", "zu"],
-            "force": ["fx", "fy", "fz"],
-            "velocity": ["vx", "vy", "vz"],
-            "charge": ["q"],
+            "atomid": [["id"]],
+            "atom": [["element"], ["type"]],
+            "coord": [["xu", "yu", "zu"], ["x", "y", "z"]],
+            "force": [["fx", "fy", "fz"]],
+            "velocity": [["vx", "vy", "vz"]],
+            "charge": [["q"]],
         }
         self._data_indices = {}
 
@@ -48,13 +46,11 @@ class LAMMPSTRJReader(BaseReader):
 
         if not self._is_column_inspected:
             columns = file.readline().split()[2:]
-            data_indices = {
+            self._data_indices = {
                 name: indices
-                for name, cols in self.property_dict.items()
-                if (indices := find_column_indices(columns, cols))
+                for name, candidates in self.property_dict.items()
+                if (indices := find_column_indices(columns, candidates))
             }
-            data_indices["atom"] = check_atomindices(data_indices["atom"])
-            self._data_indices = data_indices
             self._is_column_inspected = True
         else:
             next(file)
@@ -68,10 +64,13 @@ class LAMMPSTRJReader(BaseReader):
 
     def modify_property_columns(self, **kwargs):
         for key, value in kwargs.items():
-            if not all(isinstance(item, str) for item in value):
-                raise TypeError(f"All items in {key} must be strings")
-            if not isinstance(value, list):
-                kwargs[key] = [value]
+            if isinstance(value, str):
+                value = [[value]]
+            elif all(isinstance(item, str) for item in value):
+                value = [list(value)]
+            elif not all(isinstance(col, str) for group in value for col in group):
+                raise TypeError(f"{key} must be a column name, a column group, or a list of column groups")
+            kwargs[key] = value
         self.property_dict.update(**kwargs)
         self._is_column_inspected = False
 

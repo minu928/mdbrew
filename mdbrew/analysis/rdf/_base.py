@@ -26,12 +26,13 @@ class BaseRDF(metaclass=ABCMeta):
 
         self._rdf = None
         self._hist = None
-        self._radii = np.linspace(*range, num=nbins)
+        edges = np.linspace(*range, num=nbins + 1)
+        self._radii = 0.5 * (edges[:-1] + edges[1:])  # bin centers, matching np.histogram
         self._radii_square = self._radii * self._radii
 
         self._nbins = nbins
         self._range = range
-        self._dr = (range[1] - range[0]) / (nbins + 1)
+        self._dr = (range[1] - range[0]) / nbins
         self._factor_base = 4.0 * np.pi * self._dr
 
         self._is_run = False
@@ -60,9 +61,9 @@ class BaseRDF(metaclass=ABCMeta):
     def run(self, start: int = 0, stop: int | None = None, step: int = 1, *, verbose: bool = False):
         if len(self._x1) != len(self._x2):
             raise ValueError("x1 and x2's frames are must be same.")
-        stop = stop or len(self._x1)
+        stop = len(self._x1) if stop is None else stop
         iteration = self._update_iteration(start=start, stop=stop, step=step)
-        _max_nframe = (stop - start) // step
+        _max_nframe = len(range(start, stop, step))
         if verbose:
             iteration = tqdm(iteration, desc="Calculating RDF", unit="frame", total=_max_nframe)
 

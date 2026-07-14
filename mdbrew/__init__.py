@@ -4,7 +4,7 @@ __email__ = "minu928@snu.ac.kr"
 
 try:
     from mdbrew._version import version as __version__
-except:
+except ImportError:
     __version__ = "none"
 
 
@@ -16,6 +16,7 @@ from . import space
 from . import chemistry
 from . import type
 from .type import state, array
+from ._ops import extract, where
 
 __all__ = [
     "io",
@@ -27,12 +28,6 @@ __all__ = [
     "type",
     "state",
     "array",
+    "extract",
+    "where",
 ]
-
-from ._ops import extract, where
-
-__all__.extend(["extract", "where"])
-
-from .type import state, array
-
-__all__.extend(["state", "array"])

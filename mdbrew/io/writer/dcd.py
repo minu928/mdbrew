@@ -83,7 +83,6 @@ class DCDWriter(BaseWriter):
                 self._file.write(struct.pack(self._byteorder + "i", self._nframes_written))
             self._file.close()
             self._file = None
-            self._mode = "w"
         self._natoms = None
         self._has_box = None
         self._nframes_written = 0

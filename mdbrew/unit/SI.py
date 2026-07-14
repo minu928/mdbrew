@@ -73,8 +73,8 @@ class Temperature(metaclass=UnitMeta):
 
 @dataclass
 class Charge(metaclass=UnitMeta):
-    C = 1.0
-    e = ELECTRON_CHARGE
+    C: float = 1.0
+    e: float = ELECTRON_CHARGE
 
 
 # Derived SI units
